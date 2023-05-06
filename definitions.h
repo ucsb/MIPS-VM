@@ -20,4 +20,33 @@ typedef enum registers {
     REGISTER_COUNT // Total number of registers.
 } register_set;
 
+//register storage.
 
+uint16_t reg[REGISTER_COUNT];
+
+typedef enum opcode{
+    //R instructions
+    OP_ADDU,
+    OP_NOP,
+    OP_JR,
+    OP_SUBU,
+    OP_SLT,
+    //I instructions
+    OP_ADDIU,
+    OP_SW,
+    OP_LI,
+    OP_LUI,
+    OP_LW,
+    OP_LWL,
+    OP_LWR,
+    OP_BEQ,
+    OP_BNE,
+    OP_B,
+    OP_LBU,
+    OP_SB,
+    OP_LHU,
+    OP_SH,
+    //J instructions
+    OP_JAL,
+    OP_MOVE,
+};
