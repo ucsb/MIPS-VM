@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdint.h>
-
-#define MEMORY_MAX (1 << 16)
-uint16_t memory[MEMORY_MAX];  /* 65536 locations */
+/*
+This is a test memory. The actual memory we have commited is 64 bit. For that we are going to use uint64_t
+For 32 bits, we are using uint32_t
+*/
+#define MEMORY_MAX (1 << 16) 
+uint16_t memory[MEMORY_MAX]; 
 
 typedef enum registers {
-    r_zero, //always zero
+    r_zero = 0, //always zero
     r_at, // Assembler temporary
     r_v0, r_v1, //Return values from functions
     r_a0, r_a1, r_a2, r_a3, //Arguments to functions
