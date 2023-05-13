@@ -29,6 +29,7 @@ uint16_t reg[REGISTER_COUNT];
 
 typedef enum opcode{
     //R instructions
+    OP_ADD
     OP_ADDU,
     OP_NOP,
     OP_JR,
@@ -52,4 +53,4 @@ typedef enum opcode{
     //J instructions
     OP_JAL,
     OP_MOVE,
-};
+} opcode_i;
