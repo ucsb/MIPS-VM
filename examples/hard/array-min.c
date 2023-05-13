@@ -11,6 +11,6 @@ int main(){
             min = arr[i];
         }
     }
-    printf("Min %d\n", min);
+    //printf("Min %d\n", min);
     return 0;
 }
