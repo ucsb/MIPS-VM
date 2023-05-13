@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int main(){
-    int n;
+    int n; 
     int fib0=0, fib1=1;
     int val =0;
     int i;
