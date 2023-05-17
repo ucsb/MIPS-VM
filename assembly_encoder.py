@@ -27,21 +27,19 @@ def get_mem(addr_str):
 def set_mem(addr_str, val):
     MEMORY[addr_str] = val
 
-def label_to_offset(label):
+def label_to_offset(label, program_counter):
     # Implement your logic to calculate the offset here
-    pass
+    # TODO: Deal with negative offsets
+    return label_to_program_counter(label) - program_counter - 1
 
-def label_to_address(label):
+def label_to_program_counter(label):
     # Implement your logic to retrieve the address for the label here
     return LABEL_MAPPING[label]
 
-def assemble_instruction(instr_segments):
+def assemble_instruction(instr_segments, program_counter):
     operation = instr_segments[0]
-    if type(INSTRUCTION_MAPPING[operation]) == tuple:
-        opcode, funct = INSTRUCTION_MAPPING[operation]
-    else:
-        opcode = INSTRUCTION_MAPPING[operation]
     # print(f"Parsing {operation} instruction")
+    opcode, funct = INSTRUCTION_MAPPING[operation]
     # Parsing
     # R - type
     # Basic
@@ -85,45 +83,62 @@ def assemble_instruction(instr_segments):
     if operation in INSTRUCTION_CLASSIFICATION["I-type"]["branch"]:
         rs = get_register(instr_segments[1])
         if operation in ["beq", "bne"]:
-            rd = get_register(instr_segments[2])
+            rd = rs
+            rs = get_register(instr_segments[2])
         elif operation in ["bgez"]:
             rd = 1
         else:
             rd = 0
         label = instr_segments[-1]
-        offset = label_to_offset(label)
+        offset = label_to_offset(label, program_counter)
         return encode_i_type(opcode, rs, rd, offset)
     # J - type
     # Basic
     if operation in INSTRUCTION_CLASSIFICATION["J-type"]["basic"]:
-        address = label_to_address(instr_segments[1])
+        address = label_to_program_counter(instr_segments[1])
         return encode_j_type(opcode, address)
 
-def assemble_file(file_path):
-    ans = []
-    address_counter = 0x00400000
+def compute_label_loc(file_path):
+    program_counter = -1
     with open(file_path, "r") as lines:
         for line in lines:
             # Remove leading/trailing whitespaces/comments/commas
             line = line.split("#")[0].strip()
             line = line.replace(",", " ")
             if ":" in line:
-                LABEL_MAPPING[line.split(":")[0]] = address_counter
+                LABEL_MAPPING[line.split(":")[0]] = program_counter + 1
+                line = line.split(":")[1]
+            if not len(line):
+                continue
+            program_counter += 1
+    return program_counter
+
+def assemble_file(file_path):
+    compute_label_loc(file_path)
+    # print(LABEL_MAPPING)
+    ans = []
+    program_counter = 0
+    with open(file_path, "r") as lines:
+        for line in lines:
+            # Remove leading/trailing whitespaces/comments/commas
+            line = line.split("#")[0].strip()
+            line = line.replace(",", " ").replace("$0", "$zero")
+            if ":" in line:
                 line = line.split(":")[1]
             if not len(line):
                 continue
             instruction_segments = line.split()
-            instruction_bytecode = assemble_instruction(instruction_segments)
+            instruction_bytecode = assemble_instruction(instruction_segments, program_counter)
             # print(f"{instruction_bytecode:08x}")
             ans.append(instruction_bytecode)
-            address_counter += 4
+            program_counter += 1
     return ans
 
 
 # print(f'{assemble_instruction(["addi", "$t2", "$s1", "40"]):08x}')
 # print(f'{assemble_instruction(["addi", "$t1", "$zero", "0xaa"]):08x}')
 
-test_file = "test/easy/basic_ops.asm"
-bytecode = assemble_file(test_file)
-for instruction in bytecode:
-    print(f"{instruction:08x}")
+# test_file = "test/medium/loop.asm"
+# bytecode = assemble_file(test_file)
+# for instruction in bytecode:
+#     print(f"{instruction:08x}")

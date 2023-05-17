@@ -1,6 +1,5 @@
 REGISTER_MAPPING = {
     "$zero": 0,
-    "$0": 0,
     "$at": 1,
     "$v0": 2,
     "$v1": 3,
@@ -31,7 +30,15 @@ REGISTER_MAPPING = {
     "$gp": 28,
     "$sp": 29,
     "$fp": 30,
-    "$ra": 31
+    "$ra": 31, # Return Address
+    "HI": 32, # Used for MULT, DIV
+    "LO": 33, # Used for MULT, DIV
+    "PC": 34, # Program Counter
+    "IR": 35 # Instruction Register
+}
+
+REVERSE_REGISTER_MAPPING = {
+    y: x for x, y in REGISTER_MAPPING.items()
 }
 
 # Reference - https://phoenix.goucher.edu/~kelliher/f2009/cs220/mipsir.html
@@ -140,37 +147,43 @@ INSTRUCTION_MAPPING = {
 
     # I-Type instructions
     # arithmetic
-    "addi": 0x08,
-    "addiu": 0x09,
-    "slti": 0x0A,
-    "sltiu": 0x0B,
+    "addi": (0x08, None),
+    "addiu": (0x09, None),
+    "slti": (0x0A, None),
+    "sltiu": (0x0B, None),
     
     # logical
-    "andi": 0x0C,
-    "ori": 0x0D,
-    "xori": 0x0E,
+    "andi": (0x0C, None),
+    "ori": (0x0D, None),
+    "xori": (0x0E, None),
 
     # load
-    "lui": 0x0F,
-    "lw": 0x23,
-    "sw": 0x2B,
-    "lb": 0x20,
-    "lbu": 0x24,
-    "sb": 0x28,
+    "lui": (0x0F, None),
+    "lw": (0x23, None),
+    "sw": (0x2B, None),
+    "lb": (0x20, None),
+    "lbu": (0x24, None),
+    "sb": (0x28, None),
 
     # branch
-    "beq": 0x04,
-    "bne": 0x05,
-    "bgez": 0x01,
-    "bgtz": 0x07,
-    "blez": 0x06,
-    "bltz": 0x01,
+    "beq": (0x04, None),
+    "bne": (0x05, None),
+    "bgez": (0x01, 1),
+    "bgtz": (0x07, None),
+    "blez": (0x06, None),
+    "bltz": (0x01, 0),
 
     ############################################
 
     # J-Type instructions
-    "j": 0x02,
-    "jal": 0x03
+    "j": (0x02, None),
+    "jal": (0x03, None)
+}
+
+INSTRUCTION_TYPES = {
+    "R-type": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sll', 'srl', 'sra', 'sllv', 'srlv', 'srav', 'jr', 'jalr'],
+    "I-type": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori', 'lui', 'lw', 'sw', 'lb', 'lbu', 'sb', 'beq', 'bne', 'bgez', 'bgtz', 'blez', 'bltz'],
+    "J-type": ['j', 'jal']
 }
 
 INSTRUCTION_CLASSIFICATION = {

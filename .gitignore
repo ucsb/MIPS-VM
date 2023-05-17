@@ -1,0 +1,12 @@
+.vscode
+.o
+obj
+obj/*
+init
+.out
+.gch
+.txt
+.obj
+.tar.gz
+.pyc
+__pycache__/*
