@@ -1,8 +1,19 @@
 # CS293C-MIPS_VM-taanya
+
 Building a custom VM for MIPS architecture.
 
-# Progress
-Came up with encoder to convert from Assembly to ByteCode
+# Steps to execute
+python runner.py
 
-# TODO
-Cover all cases including label handling for assembly encoder
+# Conversion from Assembly Code to Byte Code
+- [x] Arithmetic & Logical Instructions
+- [x] Branch and Jump Instructions
+- [ ] Data Segment
+
+# Execution of Byte Code
+- [x] Arithmetic & Logical Instructions
+- [x] Branch and Jump Instructions
+- [ ] Unsigned & Negative Numbers
+- [ ] Data Segment
+- [ ] Functions
+- [ ] Floats
