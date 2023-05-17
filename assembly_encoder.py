@@ -56,7 +56,6 @@ def assemble_instruction(instr_segments):
         rd = get_register(instr_segments[1])
         rt = get_register(instr_segments[2])
         shamt = get_register(instr_segments[3])
-        shamt = 0
         return encode_r_type(opcode, 0, rt, rd, shamt, funct)
     # Jump
     if operation in INSTRUCTION_CLASSIFICATION["R-type"]["jump"]:
