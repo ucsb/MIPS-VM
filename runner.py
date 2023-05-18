@@ -18,12 +18,12 @@ def get_operation():
             return rev_instr_mapping[(op, 0)]
     return rev_instr_mapping[(op, None)]
 
-def extend_sign(imm16):
-    if imm16 & 0x00008000:
-        imm16 |= 0xffff0000
-    else:
-        imm16 &= 0x0000ffff
-    return imm16
+def parse_immediate_val(im):
+    # checking 16th bit of signed im value and converting to negative
+    # if the least significant bit is set
+    if im & 0x8000:
+        im = im - (1 << 16)
+    return im
 
 def process_r_instr(operation):
     # TODO: Deal with unsigned & Complete all functions
@@ -82,13 +82,13 @@ def process_i_instr(operation):
     print(f'I-type instr: op : {operation}, rs : {rs}, rd : {rd}, im : {im}')
     REG_DATA["PC"] += 1
     if operation == "addi":
-        REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = REG_DATA[REVERSE_REGISTER_MAPPING[rs]] + extend_sign(im)
+        REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = REG_DATA[REVERSE_REGISTER_MAPPING[rs]] + parse_immediate_val(im)
     elif operation == "addiu":
-        REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = REG_DATA[REVERSE_REGISTER_MAPPING[rs]] + extend_sign(im)
+        REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = REG_DATA[REVERSE_REGISTER_MAPPING[rs]] + parse_immediate_val(im)
     elif operation == "slti":
-        REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = 1 if (REG_DATA[REVERSE_REGISTER_MAPPING[rs]] < extend_sign(im)) else 0
+        REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = 1 if (REG_DATA[REVERSE_REGISTER_MAPPING[rs]] < parse_immediate_val(im)) else 0
     elif operation == "sltiu":
-        REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = 1 if (REG_DATA[REVERSE_REGISTER_MAPPING[rs]] < extend_sign(im)) else 0
+        REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = 1 if (REG_DATA[REVERSE_REGISTER_MAPPING[rs]] < parse_immediate_val(im)) else 0
     elif operation == "andi":
         REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = REG_DATA[REVERSE_REGISTER_MAPPING[rs]] & im
     elif operation == "ori":
@@ -108,17 +108,17 @@ def process_i_instr(operation):
     elif operation == "sb":
         pass
     elif operation == "beq" and REG_DATA[REVERSE_REGISTER_MAPPING[rd]] == REG_DATA[REVERSE_REGISTER_MAPPING[rs]]:
-        REG_DATA["PC"] = REG_DATA["PC"] + extend_sign(im)
+        REG_DATA["PC"] = REG_DATA["PC"] + parse_immediate_val(im)
     elif operation == "bne" and REG_DATA[REVERSE_REGISTER_MAPPING[rd]] != REG_DATA[REVERSE_REGISTER_MAPPING[rs]]:
-        REG_DATA["PC"] = REG_DATA["PC"] + extend_sign(im)
+        REG_DATA["PC"] = REG_DATA["PC"] + parse_immediate_val(im)
     elif operation == "bgez" and REG_DATA[REVERSE_REGISTER_MAPPING[rs]] >= 0:
-        REG_DATA["PC"] = REG_DATA["PC"] + extend_sign(im)
+        REG_DATA["PC"] = REG_DATA["PC"] + parse_immediate_val(im)
     elif operation == "bgtz" and REG_DATA[REVERSE_REGISTER_MAPPING[rs]] > 0:
-        REG_DATA["PC"] = REG_DATA["PC"] + extend_sign(im)
+        REG_DATA["PC"] = REG_DATA["PC"] + parse_immediate_val(im)
     elif operation == "blez" and REG_DATA[REVERSE_REGISTER_MAPPING[rs]] <= 0:
-        REG_DATA["PC"] = REG_DATA["PC"] + extend_sign(im)
+        REG_DATA["PC"] = REG_DATA["PC"] + parse_immediate_val(im)
     elif operation == "bltz" and REG_DATA[REVERSE_REGISTER_MAPPING[rs]] < 0:
-        REG_DATA["PC"] = REG_DATA["PC"] + extend_sign(im)
+        REG_DATA["PC"] = REG_DATA["PC"] + parse_immediate_val(im)
     else:
         print(f"Invalid / Unimplemented operation - {operation}")
     REG_DATA["$zero"] = 0

@@ -8,6 +8,9 @@ def encode_r_type(op, rs, rt, rd, shamt, funct):
     return instruction
 
 def encode_i_type(op, rs, rd, im):
+    # converting negative value to signed 16 bit integer
+    if im < 0:
+        im = (1 << 16) + im
     instruction = op << 26 | rs << 21 | rd << 16 | im
     return instruction
 
@@ -29,7 +32,6 @@ def set_mem(addr_str, val):
 
 def label_to_offset(label, program_counter):
     # Implement your logic to calculate the offset here
-    # TODO: Deal with negative offsets
     return label_to_program_counter(label) - program_counter - 1
 
 def label_to_program_counter(label):
