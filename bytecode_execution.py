@@ -1,5 +1,5 @@
 from util.mappings import *
-from assembly_encoder import *
+from assembly_to_bytecode import *
 
 REG_DATA = {x: 0 for x in REGISTER_MAPPING}
 
@@ -156,6 +156,6 @@ def process(instructions):
         print_reg_data()
 
 if __name__ == "__main__":
-    test_file = "test/medium/loop.asm"
+    test_file = "tests/medium/manual_loop.asm"
     instructions = assemble_file(test_file)
     process(instructions)

@@ -1,13 +1,13 @@
 REGISTER_MAPPING = {
     "$zero": 0,
-    "$at": 1,
-    "$v0": 2,
+    "$at": 1, # Assembler Temp Register 
+    "$v0": 2, # Result Registers
     "$v1": 3,
-    "$a0": 4,
+    "$a0": 4, # Argument Registers
     "$a1": 5,
     "$a2": 6,
     "$a3": 7,
-    "$t0": 8,
+    "$t0": 8, # Temporary Registers
     "$t1": 9,
     "$t2": 10,
     "$t3": 11,
@@ -15,7 +15,7 @@ REGISTER_MAPPING = {
     "$t5": 13,
     "$t6": 14,
     "$t7": 15,
-    "$s0": 16,
+    "$s0": 16, # General Purpose Registers
     "$s1": 17,
     "$s2": 18,
     "$s3": 19,
@@ -25,11 +25,11 @@ REGISTER_MAPPING = {
     "$s7": 23,
     "$t8": 24,
     "$t9": 25,
-    "$k0": 26,
+    "$k0": 26, # Kernel Registers
     "$k1": 27,
-    "$gp": 28,
-    "$sp": 29,
-    "$fp": 30,
+    "$gp": 28, # Global Pointer
+    "$sp": 29, # Stack Pointer
+    "$fp": 30, # Frame Pointer
     "$ra": 31, # Return Address
     "HI": 32, # Used for MULT, DIV
     "LO": 33, # Used for MULT, DIV

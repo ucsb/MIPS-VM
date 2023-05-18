@@ -140,7 +140,7 @@ def assemble_file(file_path):
 # print(f'{assemble_instruction(["addi", "$t2", "$s1", "40"]):08x}')
 # print(f'{assemble_instruction(["addi", "$t1", "$zero", "0xaa"]):08x}')
 
-# test_file = "test/medium/loop.asm"
-# bytecode = assemble_file(test_file)
-# for instruction in bytecode:
-#     print(f"{instruction:08x}")
+test_file = "tests/easy/manual_sum.asm"
+bytecode = assemble_file(test_file)
+for instruction in bytecode:
+    print(f"{instruction:08x}")
