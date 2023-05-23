@@ -1,12 +1,13 @@
 int main(){
-    // loading the matrix
-    int arr[4][3] = {{1,2,3},{4,5,6},{7,8,9},{10,11,12}};
-    int summ=0,i,j;
-
-    for(i=0;i<4;i++){
-        for()
-
-    }
+    //checking if number is positive multiple of 4
+    // loading the number
+    int num = 7, flag=0;
     
-
+    if(num>0){
+        if(num % 4 ==0){
+            flag =1;
+        }
+    }
+    //final value of flag = 0
+    return 0;
 }
