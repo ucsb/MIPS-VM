@@ -2,8 +2,6 @@ from util.mappings import *
 import sys
 import os
 
-MEMORY_MAPPING = {}
-LABEL_MAPPING = {}
 IGNORE_COMMANDS = [".text", ".abicalls", ".option", ".nan", ".file",
                    ".globl", ".p2align", ".type", ".set", ".ent",
                    ".end", ".size", ".ident", ".addrsig"]
@@ -32,21 +30,21 @@ def get_register(reg_str):
 def get_immediate_val(imm_str):
     return int(imm_str) if "x" not in imm_str else int(imm_str, 16)
 
-def get_mem(addr_str):
-    return MEMORY_MAPPING[addr_str]
+def get_mem(addr_str, memory_mapping):
+    return memory_mapping[addr_str]
 
-def set_mem(addr_str, val):
-    MEMORY_MAPPING[addr_str] = val
+def set_mem(addr_str, val, memory_mapping):
+    memory_mapping[addr_str] = val
 
-def label_to_offset(label, program_counter):
+def label_to_offset(label, program_counter, label_mapping):
     # Implement your logic to calculate the offset here
-    return (label_to_program_counter(label) >> 2) - (program_counter >> 2) - 1
+    return (label_to_program_counter(label, label_mapping) >> 2) - (program_counter >> 2) - 1
 
-def label_to_program_counter(label):
+def label_to_program_counter(label, label_mapping):
     # Implement your logic to retrieve the address for the label here
-    return LABEL_MAPPING[label]
+    return label_mapping[label]
 
-def assemble_instruction(instr_segments, program_counter):
+def assemble_instruction(instr_segments, program_counter, label_mapping):
     operation = instr_segments[0]
     # handling nop instruction
     if operation == "nop":
@@ -60,6 +58,11 @@ def assemble_instruction(instr_segments, program_counter):
     # for e.g. bnez $t0, label -> bne $t0, $zero, label
     if operation == "bnez":
         operation = "bne"
+        instr_segments.insert(2, "$zero")
+    # converting beqz to bne instruction
+    # for e.g. beqz $t0, label -> beq $t0, $zero, label
+    if operation == "beqz":
+        operation = "beq"
         instr_segments.insert(2, "$zero")
     # print(f"Parsing {operation} instruction")
     opcode, funct = INSTRUCTION_MAPPING.get(operation, (None, None))
@@ -115,18 +118,18 @@ def assemble_instruction(instr_segments, program_counter):
         else:
             rd = 0
         label = instr_segments[-1]
-        offset = label_to_offset(label, program_counter)
+        offset = label_to_offset(label, program_counter, label_mapping)
         return encode_i_type(opcode, rs, rd, offset)
     # J - type
     # Basic
     if operation in INSTRUCTION_CLASSIFICATION["J-type"]["basic"]:
-        address = label_to_program_counter(instr_segments[1])
+        address = label_to_program_counter(instr_segments[1], label_mapping)
         return encode_j_type(opcode, address)
 
 def preprocess_line(line):
     # Remove leading/trailing whitespaces/comments/commas
     line = line.split("#")[0].strip()
-    line = line.replace(",", " ").replace("$0", "$zero").strip()
+    line = line.replace(",", " ").strip()
     for command in IGNORE_COMMANDS:
         if line.startswith(command):
             return ""
@@ -135,23 +138,26 @@ def preprocess_line(line):
             return ""
     return line
 
-def compute_label_loc(file_path):
+def compute_label_mapping(file_path):
     program_counter = -1
+    label_mapping = {}
     with open(file_path, "r") as lines:
         for line in lines:
             line = preprocess_line(line)
             if ":" in line:
-                LABEL_MAPPING[line.split(":")[0]] = (program_counter + 1) << 2
+                label_mapping[line.split(":")[0]] = PROGRAM_COUNTER_START + ((program_counter + 1) << 2)
                 line = line.split(":")[1].strip()
             if not len(line):
                 continue
             program_counter += 1
+    return label_mapping
 
 def assemble_file(file_path):
-    compute_label_loc(file_path)
-    # print(LABEL_MAPPING)
     encoded_instructions = {}
-    program_counter = 0
+    program_instructions = {}
+    memory_mapping = {}
+    label_mapping = compute_label_mapping(file_path)
+    program_counter = PROGRAM_COUNTER_START
     with open(file_path, "r") as lines:
         for line in lines:
             line = preprocess_line(line)
@@ -160,16 +166,14 @@ def assemble_file(file_path):
             if not len(line):
                 continue
             instruction_segments = line.split()
-            instruction_bytecode = assemble_instruction(instruction_segments, program_counter)
+            instruction_bytecode = assemble_instruction(instruction_segments, program_counter, label_mapping)
             # print(line)
             # print(f"{instruction_bytecode:08x}")
-            encoded_instructions[program_counter] = instruction_bytecode
+            program_instructions[program_counter] = instruction_bytecode
+            encoded_instructions[program_counter] = line
+            # memory_mapping[program_counter] = instruction_bytecode
             program_counter += 4
-    return encoded_instructions, LABEL_MAPPING, MEMORY_MAPPING
-
-
-# print(f'{assemble_instruction(["addi", "$t2", "$s1", "40"]):08x}')
-# print(f'{assemble_instruction(["addi", "$t1", "$zero", "0xaa"]):08x}')
+    return program_instructions, encoded_instructions, label_mapping, memory_mapping
 
 if __name__ == "__main__":
     test_dirs = sys.argv[1:]
@@ -180,8 +184,8 @@ if __name__ == "__main__":
             test_files = [test_dir]
         for test_file in test_files:
             print(test_file)
-            encoded_instructions, label_mapping, memory_mapping = assemble_file(test_file)
-            for program_counter, instruction in encoded_instructions.items():
-                print(f"{program_counter:08x}: {instruction:08x}")
+            program_instructions, encoded_instructions, label_mapping, memory_mapping = assemble_file(test_file)
+            for program_counter in program_instructions:
+                print(f"{encoded_instructions[program_counter]}  ===> {program_instructions[program_counter]:08x}")
             print(label_mapping)
             print(memory_mapping)

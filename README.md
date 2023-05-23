@@ -8,7 +8,7 @@ Building a custom VM for MIPS architecture.
 - For converting assembly file to bytecode
 ### python assembly_to_bytecode.py tests/easy/auto_integers_basic.asm
 - For executing bytecode
-### python bytecode_execution.py
+### python bytecode_execution.py tests/easy/auto_integers_basic.asm
 
 # Conversion from Assembly Code to Byte Code
 - [x] Arithmetic & Logical Instructions
