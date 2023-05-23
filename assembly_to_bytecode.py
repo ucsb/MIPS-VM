@@ -220,9 +220,9 @@ if __name__ == "__main__":
         else:
             test_files = [test_dir]
         for test_file in test_files:
-            print(test_file)
+            print("FileName: ", test_file)
             program_instructions, encoded_instructions, label_mapping, memory_mapping = assemble_file(test_file)
             for program_counter in program_instructions:
                 print(f"{encoded_instructions[program_counter]}  ===> {program_instructions[program_counter]:08x}")
-            print(label_mapping)
-            print(memory_mapping)
+            print("LabelMapping: ",label_mapping)
+            print("Memory Mapping: ", memory_mapping)
