@@ -61,6 +61,8 @@ REVERSE_REGISTER_MAPPING = {
 # xor  000000 rs    rt    rd    00000 100110 rd=rs^rt
 # nor  000000 rs    rt    rd    00000 100111 rd=!(rs|rt)
 
+# movn 000000 rs    rt    rd    00000 001011 rd = rs if rt != 0
+
 #      op     rs    rt    rd    shamt funct  function
 # sll  000000 00000 rt    rd    shamt 000000 rd=rt<<shamt
 # srl  000000 00000 rt    rd    shamt 000010 rd=rt>>shamt
@@ -143,6 +145,9 @@ INSTRUCTION_MAPPING = {
     "jr": (0x00, 0x08),
     "jalr": (0x00, 0x09),
 
+    # move
+    "movn": (0x00, 0x0B),
+
     ############################################
 
     # I-Type instructions
@@ -181,14 +186,14 @@ INSTRUCTION_MAPPING = {
 }
 
 INSTRUCTION_TYPES = {
-    "R-type": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sll', 'srl', 'sra', 'sllv', 'srlv', 'srav', 'jr', 'jalr'],
+    "R-type": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sll', 'srl', 'sra', 'sllv', 'srlv', 'srav', 'jr', 'jalr', 'movn'],
     "I-type": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori', 'lui', 'lw', 'sw', 'lb', 'lbu', 'sb', 'beq', 'bne', 'bgez', 'bgtz', 'blez', 'bltz'],
     "J-type": ['j', 'jal']
 }
 
 INSTRUCTION_CLASSIFICATION = {
     "R-type": {
-        "basic": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sllv', 'srlv', 'srav'],
+        "basic": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sllv', 'srlv', 'srav', 'movn'],
         "zero_rs": ['sll', 'srl', 'sra'],
         "jump": ['jr', 'jalr']
     },

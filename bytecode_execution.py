@@ -3,7 +3,7 @@ from assembly_to_bytecode import *
 
 REG_DATA = {x: 0 for x in REGISTER_MAPPING}
 
-def get_operation():
+def get_operation_type():
     rev_instr_mapping = {y:x for x, y in INSTRUCTION_MAPPING.items()}
     op = (REG_DATA["IR"] & 0xFC000000) >> 26
     # checking if they are R - instructions
@@ -53,6 +53,9 @@ def process_r_instr(operation):
         REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = REG_DATA[REVERSE_REGISTER_MAPPING[rs]] ^ REG_DATA[REVERSE_REGISTER_MAPPING[rt]]
     elif operation == "nor":
         REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = ~(REG_DATA[REVERSE_REGISTER_MAPPING[rs]] | REG_DATA[REVERSE_REGISTER_MAPPING[rt]])
+    elif operation == "movn":
+        if REG_DATA[REVERSE_REGISTER_MAPPING[rt]] != 0:
+            REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = REG_DATA[REVERSE_REGISTER_MAPPING[rs]]
     elif operation == "sll":
         REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = REG_DATA[REVERSE_REGISTER_MAPPING[rs]] << shamt
     elif operation == "srl":
@@ -146,7 +149,11 @@ def process(instructions):
     while REG_DATA["PC"] < 4096 and REG_DATA["PC"] < len(instructions):
         REG_DATA["IR"] = instructions[REG_DATA["PC"]]
         print(f"Processing - {REG_DATA['IR']:08x}")
-        operation = get_operation()
+        # dealing with nop
+        if REG_DATA['IR'] == 0:
+            REG_DATA["PC"] += 1
+            continue
+        operation = get_operation_type()
         if operation in INSTRUCTION_TYPES["R-type"]:
             process_r_instr(operation)
         elif operation in INSTRUCTION_TYPES["I-type"]:
