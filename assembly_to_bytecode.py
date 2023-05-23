@@ -1,11 +1,13 @@
 from util.mappings import *
 import sys
 import os
+import re
 
 IGNORE_COMMANDS = [".text", ".abicalls", ".option", ".nan", ".file",
                    ".globl", ".p2align", ".type", ".set", ".ent",
-                   ".end", ".size", ".ident", ".addrsig"]
-TODO_COMMANDS = [".section", ".frame", ".mask", ".fmask"]
+                   ".end", ".size", ".ident", ".addrsig", ".frame",
+                   ".mask", ".fmask"]
+TODO_COMMANDS = [".section", ".4byte"]
 
 def encode_r_type(op, rs, rt, rd, shamt, funct):
     instruction = op << 26 | rs << 21 | rt << 16 | rd << 11 | shamt << 6 | funct
@@ -101,7 +103,7 @@ def assemble_instruction(instr_segments, program_counter, label_mapping):
     if operation in INSTRUCTION_CLASSIFICATION["I-type"]["memory"]:
         rd = get_register(instr_segments[1])
         if operation == "lui":
-            im = get_immediate_val(instr_segments[3])
+            im = get_immediate_val(instr_segments[2])
             return encode_i_type(opcode, 0, rd, im)
         else:
             offset = int(instr_segments[2].split("(")[0])
@@ -133,38 +135,73 @@ def preprocess_line(line):
     for command in IGNORE_COMMANDS:
         if line.startswith(command):
             return ""
-    for command in TODO_COMMANDS:
-        if line.startswith(command):
-            return ""
     return line
 
-def compute_label_mapping(file_path):
-    program_counter = -1
+def preprocess_instructions(file_path):
     label_mapping = {}
+    memory_mapping = {}
+    free_memory_pointer = MEMORY_POINTER_START
+    next_program_counter = PROGRAM_COUNTER_START
+    memory_read = False
     with open(file_path, "r") as lines:
         for line in lines:
             line = preprocess_line(line)
+            if line.startswith(".section"):
+                if line.split()[1].startswith(".rodata"):
+                    memory_read = True
+                else:
+                    memory_read = False
+                continue
+            if line.startswith(".4byte"):
+                val = int(line.split()[1])
+                if (val & 0x80000000) > 0:
+                    val = val - (1 << 32)
+                memory_mapping[free_memory_pointer] = val
+                free_memory_pointer += 4
+                continue
             if ":" in line:
-                label_mapping[line.split(":")[0]] = PROGRAM_COUNTER_START + ((program_counter + 1) << 2)
+                label = line.split(":")[0]
+                if memory_read:
+                    label_mapping[label] = free_memory_pointer
+                else:
+                    label_mapping[label] = next_program_counter
                 line = line.split(":")[1].strip()
             if not len(line):
                 continue
-            program_counter += 1
-    return label_mapping
+            if not memory_read:
+                next_program_counter += 4
+    return label_mapping, memory_mapping
+
+def process_functions(line, label_mapping):
+    label_matches = re.findall(r'%hi\((.*?)\)', line)
+    for label in label_matches:
+        val = (label_mapping[label] >> 16) & 0xFFFF
+        line = line.replace("%hi({})".format(label), str(val))
+    label_matches = re.findall(r'%lo\((.*?)\)', line)
+    for label in label_matches:
+        val = label_mapping[label] & 0xFFFF
+        line = line.replace("%lo({})".format(label), str(val))
+    return line
 
 def assemble_file(file_path):
     encoded_instructions = {}
     program_instructions = {}
-    memory_mapping = {}
-    label_mapping = compute_label_mapping(file_path)
+    label_mapping, memory_mapping = preprocess_instructions(file_path)
+    print(label_mapping, memory_mapping)
     program_counter = PROGRAM_COUNTER_START
     with open(file_path, "r") as lines:
         for line in lines:
             line = preprocess_line(line)
+            line = process_functions(line, label_mapping)
             if ":" in line:
                 line = line.split(":")[1]
+            for command in TODO_COMMANDS:
+                if line.startswith(command):
+                    line = ""
+                    break
             if not len(line):
                 continue
+            print(line)
             instruction_segments = line.split()
             instruction_bytecode = assemble_instruction(instruction_segments, program_counter, label_mapping)
             # print(line)

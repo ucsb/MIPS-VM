@@ -13,10 +13,10 @@ Building a custom VM for MIPS architecture.
 # Conversion from Assembly Code to Byte Code
 - [x] Arithmetic & Logical Instructions
 - [x] Branch and Jump Instructions
-- [ ] Functions
-- [ ] Data Segment
+- [x] Functions
+- [x] Data Segment
 - [ ] Floats
-- [ ] Arrays
+- [x] Arrays
 - [ ] String
 - [ ] Print Statements
 
@@ -24,9 +24,9 @@ Building a custom VM for MIPS architecture.
 - [x] Arithmetic & Logical Instructions
 - [x] Branch and Jump Instructions
 - [ ] Unsigned & Negative Numbers
-- [ ] Functions
-- [ ] Data Segment
+- [x] Functions
+- [x] Data Segment
 - [ ] Floats
-- [ ] Arrays
+- [x] Arrays
 - [ ] String
 - [ ] Print Statements

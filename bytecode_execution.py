@@ -23,7 +23,7 @@ def get_operation_type():
 def parse_immediate_val(im):
     # checking 16th bit of signed im value and converting to negative
     # if the least significant bit is set
-    if im & 0x8000:
+    if (im & 0x8000) > 0:
         im = im - (1 << 16)
     return im
 
