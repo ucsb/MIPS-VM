@@ -24,16 +24,16 @@ main:                                   # @main
 	sw	$fp, 16($sp)                    # 4-byte Folded Spill
 	move	$fp, $sp
 	sw	$zero, 12($fp)
-	addiu	$1, $zero, 8
+	addiu	$1, $zero, 10
 	sw	$1, 8($fp)
-	addiu	$1, $zero, 20
+	addiu	$1, $zero, 24
 	sw	$1, 4($fp)
 	lw	$2, 4($fp)
 	lw	$1, 8($fp)
 	and	$1, $1, $2
 	sw	$1, 8($fp)
 	lw	$1, 4($fp)
-	ori	$1, $1, 20
+	ori	$1, $1, 17
 	sw	$1, 4($fp)
 	addiu	$2, $zero, 0
 	move	$sp, $fp

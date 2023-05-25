@@ -15,6 +15,6 @@ int main(){
             total = total + increment_one(i);
         }
     }
-    //final value -> total= 60
+    //final value -> total = 60
     return 0;
 }

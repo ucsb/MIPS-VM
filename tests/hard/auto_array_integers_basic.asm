@@ -45,17 +45,15 @@ main:                                   # @main
 	sw	$1, 28($fp)
 	lui	$1, %hi($__const.main.arr2)
 	addiu	$2, $1, %lo($__const.main.arr2)
-	lw	$3, 12($2)
-	sw	$3, 12($fp)
 	lw	$3, 8($2)
-	sw	$3, 8($fp)
+	sw	$3, 12($fp)
 	lw	$2, 4($2)
-	sw	$2, 4($fp)
+	sw	$2, 8($fp)
 	lw	$1, %lo($__const.main.arr2)($1)
-	sw	$1, 0($fp)
-	lw	$1, 4($fp)
-	addiu	$1, $1, 5
 	sw	$1, 4($fp)
+	lw	$1, 8($fp)
+	addiu	$1, $1, 5
+	sw	$1, 8($fp)
 	addiu	$2, $zero, 0
 	move	$sp, $fp
 	lw	$fp, 48($sp)                    # 4-byte Folded Reload
@@ -84,14 +82,12 @@ $__const.main.arr:
 	.size	$__const.main.arr, 28
 
 	.type	$__const.main.arr2,@object      # @__const.main.arr2
-	.section	.rodata.str4.4,"aMS",@progbits,4
 	.p2align	2, 0x0
 $__const.main.arr2:
 	.4byte	9                               # 0x9
 	.4byte	11                              # 0xb
 	.4byte	4294967290                      # 0xfffffffa
-	.4byte	0                               # 0x0
-	.size	$__const.main.arr2, 16
+	.size	$__const.main.arr2, 12
 
 	.ident	"Homebrew clang version 16.0.3"
 	.section	".note.GNU-stack","",@progbits

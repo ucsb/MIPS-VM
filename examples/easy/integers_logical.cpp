@@ -1,9 +1,10 @@
 int main(){
     // just loading the numbers
-    int a = 8, b = 20;
+    int a = 10, b = 24;
     // and
     a &= b;
     // or
-    b |= 20;
+    b |= 17;
+    // final values -> a = 8, b = 25
     return 0;
 }

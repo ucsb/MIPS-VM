@@ -10,6 +10,6 @@ int main(){
     }
     // ternary operator
     c += a > b ? -5 : 5;
-    // final value of c = 15
+    // final value -> a = 8, b = 20, c = 15
     return 0;
 }

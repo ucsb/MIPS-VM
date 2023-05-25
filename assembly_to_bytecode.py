@@ -6,7 +6,9 @@ import re
 IGNORE_COMMANDS = [".text", ".abicalls", ".option", ".nan", ".file",
                    ".globl", ".p2align", ".type", ".set", ".ent",
                    ".end", ".size", ".ident", ".addrsig", ".frame",
-                   ".mask", ".fmask"]
+                   ".mask", ".fmask", ".cfi_def_cfa_register",
+                   ".cfi_startproc", ".cfi_def_cfa_offset",
+                   ".cfi_offset", ".cfi_endproc"]
 TODO_COMMANDS = [".section", ".4byte"]
 
 def encode_r_type(op, rs, rt, rd, shamt, funct):
@@ -153,7 +155,11 @@ def preprocess_instructions(file_path):
                     memory_read = False
                 continue
             if line.startswith(".4byte"):
-                val = int(line.split()[1])
+                val = line.split()[1].strip()
+                if val.isdigit():
+                    val = int(val)
+                else:
+                    val = label_mapping[val.lstrip("(").rstrip(")")]
                 if (val & 0x80000000) > 0:
                     val = val - (1 << 32)
                 memory_mapping[free_memory_pointer] = val
@@ -187,7 +193,7 @@ def assemble_file(file_path):
     encoded_instructions = {}
     program_instructions = {}
     label_mapping, memory_mapping = preprocess_instructions(file_path)
-    print(label_mapping, memory_mapping)
+    # print(label_mapping, memory_mapping)
     program_counter = PROGRAM_COUNTER_START
     with open(file_path, "r") as lines:
         for line in lines:
@@ -201,7 +207,7 @@ def assemble_file(file_path):
                     break
             if not len(line):
                 continue
-            print(line)
+            # print(line)
             instruction_segments = line.split()
             instruction_bytecode = assemble_instruction(instruction_segments, program_counter, label_mapping)
             # print(line)
