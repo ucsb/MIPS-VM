@@ -16,8 +16,8 @@ int main(){
     _input_int(a);
     _input_int(b);
 
-    a= fibonacci(5);
-    b= fibonacci(10);
+    a= fibonacci(a);
+    b= fibonacci(b);
     int c = a - b;
     _print_int(a);
     _print_int(b);

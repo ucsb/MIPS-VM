@@ -10,7 +10,6 @@ int main(){
     int a, b, c;
     _input_int(a);
     _input_int(b);
-    _input_int(c);
     // if condition
     if(a <= b){
         c = 10;

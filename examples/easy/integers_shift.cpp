@@ -9,8 +9,7 @@ int main(){
     int a, b, c, d;
     _input_int(a);
     _input_int(b);
-    _input_int(c);
-    _input_int(d);
+
     // left shift
     c = a >> 2;
     // right shift

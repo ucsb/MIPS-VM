@@ -13,7 +13,6 @@ int increment_two(int num){
 
 int main(){
     int i, total,n;
-    _input_int(i);
     _input_int(total);
     _input_int(n);
     for (i=0;i<n;i++){

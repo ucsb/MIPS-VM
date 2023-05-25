@@ -16,7 +16,7 @@ int main(){
     _input_int(x);
     _input_int(y);
     int z=x+y;
-    //x= 11
+    //z= 11
 
     //bitwise operation
     int op1, op2;
@@ -55,7 +55,7 @@ int main(){
 
     //final values -> c = -5, x= 11, res1 = 4, res2 = -8, res3= -2, res4 = -2, res5 = 20, res6 = -20, res7 = -2
     _print_int(c);
-    _print_int(x);
+    _print_int(z);
     _print_int(res1);
     _print_int(res2);
     _print_int(res3);

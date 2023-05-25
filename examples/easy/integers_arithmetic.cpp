@@ -20,6 +20,5 @@ int main(){
     _print_int(a);
     _print_int(b);
     _print_int(c);
-    // final values -> a = 15, b = 29, c = -6
     return 0;
 }
