@@ -226,7 +226,7 @@ if __name__ == "__main__":
     #     for test_file in test_files:
     #         print(test_file)
     test_file = sys.argv[2]
-    print(test_file)
+    print("test file: ", test_file)
     file_inputs = sys.argv[4:]
-    print(file_inputs)
+    print("file inputs: ",file_inputs)
     run_vm(test_file, file_inputs)

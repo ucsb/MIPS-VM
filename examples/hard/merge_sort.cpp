@@ -1,3 +1,9 @@
+void _print_int(int& x){
+}
+
+void _input_int(int& x){
+}
+
 // Function to merge the sub-arrays.
 void merge(int *arr, int low, int mid, int high) {
     int i, j, k;
@@ -66,13 +72,22 @@ void mergeSort(int * arr, int low, int high) {
 
 int main() {
     // Initialzing the array.
-    int arr[7] = {9, 14, 4, 6, 5, 8, 7};
+    int n;
+    int arr[10];
+
+    _input_int(n);
+    for(int i=0;i<n;i++){
+        _input_int(arr[i]);
+    }
 
     // Calculating the length of the array.
-    int length = 7;
-
+    int length = n;
     // Calling the mergeSort() function.
     mergeSort(arr, 0, length - 1);
+    
+    for(int i=0;i<n;i++){
+        _print_int(arr[i]);
+    }
     // final values -> 983000: 4, 983004: 5, 983008: 6, 983012: 7, 983016: 8, 983020: 9, 983024: 14
     return 0;
 }

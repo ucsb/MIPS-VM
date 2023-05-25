@@ -1,3 +1,9 @@
+void _print_int(int& x){
+}
+
+void _input_int(int& x){
+}
+
 int main(){
     //addition
     unsigned int a =6, b = 10;
