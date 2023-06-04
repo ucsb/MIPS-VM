@@ -124,6 +124,8 @@ INSTRUCTION_MAPPING = {
     "subu": (0x00, 0x23),
     "slt": (0x00, 0x2A),
     "sltu": (0x00, 0x2B),
+    "mul": (0x00, 0x18),
+    "div": (0x00, 0x1A),
 
     # logical -> shamt = 0
     "and": (0x00, 0x24),
@@ -147,6 +149,8 @@ INSTRUCTION_MAPPING = {
 
     # move
     "movn": (0x00, 0x0B),
+    "mfhi": (0x00, 0x10),
+    "mflo": (0x00, 0x12),
 
     ############################################
 
@@ -171,6 +175,7 @@ INSTRUCTION_MAPPING = {
     "sb": (0x28, None),
 
     # branch
+    "teq": (0x12, None),
     "beq": (0x04, None),
     "bne": (0x05, None),
     "bgez": (0x01, 1),
@@ -186,19 +191,19 @@ INSTRUCTION_MAPPING = {
 }
 
 INSTRUCTION_TYPES = {
-    "R-type": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sll', 'srl', 'sra', 'sllv', 'srlv', 'srav', 'jr', 'jalr', 'movn'],
-    "I-type": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori', 'lui', 'lw', 'sw', 'lb', 'lbu', 'sb', 'beq', 'bne', 'bgez', 'bgtz', 'blez', 'bltz'],
+    "R-type": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sll', 'srl', 'sra', 'sllv', 'srlv', 'srav', 'jr', 'jalr', 'movn', 'mul', 'div', 'mfhi', 'mflo'],
+    "I-type": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori', 'lui', 'lw', 'sw', 'lb', 'lbu', 'sb', 'beq', 'bne', 'bgez', 'bgtz', 'blez', 'bltz', 'teq'],
     "J-type": ['j', 'jal']
 }
 
 INSTRUCTION_CLASSIFICATION = {
     "R-type": {
-        "basic": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sllv', 'srlv', 'srav', 'movn'],
+        "basic": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sllv', 'srlv', 'srav', 'movn', 'mul', 'div'],
         "zero_rs": ['sll', 'srl', 'sra'],
-        "jump": ['jr', 'jalr']
+        "jump": ['jr', 'jalr', 'mfhi', 'mflo']
     },
     "I-type": {
-        "basic": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori'],
+        "basic": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori', 'teq'],
         "memory": ['lui', 'lw', 'sw', 'lb', 'lbu', 'sb'],
         "branch": ['beq', 'bne', 'bgez', 'bgtz', 'blez', 'bltz']
     },

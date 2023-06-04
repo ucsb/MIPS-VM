@@ -52,6 +52,11 @@ def process_r_instr(operation):
         REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rs_data - rt_data
     elif operation == "subu":
         REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rs_data - rt_data
+    if operation == "mul":
+        REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rs_data * rt_data
+    if operation == "div":
+        REG_DATA["LO"] = rs_data // rt_data
+        REG_DATA["HI"] = rs_data % rt_data
     elif operation == "slt":
         REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = 1 if (rs_data < rt_data) else 0
     elif operation == "sltu":
@@ -87,6 +92,10 @@ def process_r_instr(operation):
     elif operation == "jalr":
         REG_DATA["$ra"] = REG_DATA["PC"]
         REG_DATA["PC"] = rs_data
+    elif operation == "mflo":
+        REG_DATA[REVERSE_REGISTER_MAPPING[rs]] = REG_DATA["LO"]
+    elif operation == "mfhi":
+        REG_DATA[REVERSE_REGISTER_MAPPING[rs]] = REG_DATA["HI"]
     elif operation not in INSTRUCTION_TYPES["R-type"]:
         print(f"Invalid / Unimplemented operation - {operation}")
     REG_DATA["$zero"] = 0
@@ -130,6 +139,8 @@ def process_i_instr(operation):
         MEMORY_MAPPING[rs_data + parse_immediate_val(im)] = rd_data
     elif (operation == "beq") and (rd_data == rs_data):
         REG_DATA["PC"] = REG_DATA["PC"] + (parse_immediate_val(im)<<2)
+    elif (operation == "teq") and (rd_data == rs_data):
+        REG_DATA["PC"] = REG_DATA["PC"] + (parse_immediate_val(im)<<2)
     elif (operation == "bne") and (rd_data != rs_data):
         REG_DATA["PC"] = REG_DATA["PC"] + (parse_immediate_val(im)<<2)
     elif (operation == "bgez") and (rs_data >= 0):
@@ -158,7 +169,7 @@ def process_j_instr(operation, print_int_func_addr, input_int_func_addr, file_in
         if addr == print_int_func_addr:
             STDOUT_VALUES.append(MEMORY_MAPPING[REG_DATA["$a0"]])
         elif addr == input_int_func_addr:
-            MEMORY_MAPPING[REG_DATA["$a0"]] = file_inputs[0]
+            MEMORY_MAPPING[REG_DATA["$a0"]] = int(file_inputs[0])
             file_inputs.pop(0)
     elif operation not in INSTRUCTION_TYPES["J-type"]:
         print(f"Invalid / Unimplemented operation - {operation}")
@@ -198,20 +209,21 @@ def execute_code(memory_mapping, label_mapping, program_instructions, encoded_in
             process_i_instr(operation)
         else:
             process_j_instr(operation, print_int_func_addr, input_int_func_addr, file_inputs)
-        # print_data()
-        # import ipdb; ipdb.set_trace()
     # print_data()
     return STDOUT_VALUES
 
-def init_reg_data():
-    global REG_DATA
+def init_info_data():
+    global REG_DATA, MEMORY_MAPPING, STDOUT_VALUES
+    REG_DATA = {}
+    MEMORY_MAPPING = {}
+    STDOUT_VALUES = []
     REG_DATA = {x: 0 for x in REGISTER_MAPPING}
     REG_DATA['$sp'] = STACK_POINTER_END
     REG_DATA['$fp'] = REG_DATA['$sp']
 
 def run_vm(file, file_inputs):
     program_instructions, encoded_instructions, label_mapping, memory_mapping = assemble_file(file)
-    init_reg_data()
+    init_info_data()
     stdout_vals = execute_code(memory_mapping, label_mapping, program_instructions, encoded_instructions, file_inputs)
     print(f"Output - {stdout_vals}")
     return stdout_vals

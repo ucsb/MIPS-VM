@@ -5,6 +5,70 @@
 	.nan	legacy
 	.text
 	.file	"integers_pass_by_ref_funcs.cpp"
+	.globl	_Z10_print_intRi                # -- Begin function _Z10_print_intRi
+	.p2align	2
+	.type	_Z10_print_intRi,@function
+	.set	nomicromips
+	.set	nomips16
+	.ent	_Z10_print_intRi
+_Z10_print_intRi:                       # @_Z10_print_intRi
+	.frame	$fp,16,$ra
+	.mask 	0xc0000000,-4
+	.fmask	0x00000000,0
+	.set	noreorder
+	.set	nomacro
+	.set	noat
+# %bb.0:
+	addiu	$sp, $sp, -16
+	sw	$ra, 12($sp)                    # 4-byte Folded Spill
+	sw	$fp, 8($sp)                     # 4-byte Folded Spill
+	move	$fp, $sp
+	sw	$4, 4($fp)
+	move	$sp, $fp
+	lw	$fp, 8($sp)                     # 4-byte Folded Reload
+	lw	$ra, 12($sp)                    # 4-byte Folded Reload
+	addiu	$sp, $sp, 16
+	jr	$ra
+	nop
+	.set	at
+	.set	macro
+	.set	reorder
+	.end	_Z10_print_intRi
+$func_end0:
+	.size	_Z10_print_intRi, ($func_end0)-_Z10_print_intRi
+                                        # -- End function
+	.globl	_Z10_input_intRi                # -- Begin function _Z10_input_intRi
+	.p2align	2
+	.type	_Z10_input_intRi,@function
+	.set	nomicromips
+	.set	nomips16
+	.ent	_Z10_input_intRi
+_Z10_input_intRi:                       # @_Z10_input_intRi
+	.frame	$fp,16,$ra
+	.mask 	0xc0000000,-4
+	.fmask	0x00000000,0
+	.set	noreorder
+	.set	nomacro
+	.set	noat
+# %bb.0:
+	addiu	$sp, $sp, -16
+	sw	$ra, 12($sp)                    # 4-byte Folded Spill
+	sw	$fp, 8($sp)                     # 4-byte Folded Spill
+	move	$fp, $sp
+	sw	$4, 4($fp)
+	move	$sp, $fp
+	lw	$fp, 8($sp)                     # 4-byte Folded Reload
+	lw	$ra, 12($sp)                    # 4-byte Folded Reload
+	addiu	$sp, $sp, 16
+	jr	$ra
+	nop
+	.set	at
+	.set	macro
+	.set	reorder
+	.end	_Z10_input_intRi
+$func_end1:
+	.size	_Z10_input_intRi, ($func_end1)-_Z10_input_intRi
+                                        # -- End function
 	.globl	_Z7get_sumRiS_                  # -- Begin function _Z7get_sumRiS_
 	.p2align	2
 	.type	_Z7get_sumRiS_,@function
@@ -41,8 +105,8 @@ _Z7get_sumRiS_:                         # @_Z7get_sumRiS_
 	.set	macro
 	.set	reorder
 	.end	_Z7get_sumRiS_
-$func_end0:
-	.size	_Z7get_sumRiS_, ($func_end0)-_Z7get_sumRiS_
+$func_end2:
+	.size	_Z7get_sumRiS_, ($func_end2)-_Z7get_sumRiS_
                                         # -- End function
 	.globl	main                            # -- Begin function main
 	.p2align	2
@@ -51,42 +115,54 @@ $func_end0:
 	.set	nomips16
 	.ent	main
 main:                                   # @main
-	.frame	$fp,40,$ra
+	.frame	$fp,48,$ra
 	.mask 	0xc0000000,-4
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
 	.set	noat
 # %bb.0:
-	addiu	$sp, $sp, -40
-	sw	$ra, 36($sp)                    # 4-byte Folded Spill
-	sw	$fp, 32($sp)                    # 4-byte Folded Spill
+	addiu	$sp, $sp, -48
+	sw	$ra, 44($sp)                    # 4-byte Folded Spill
+	sw	$fp, 40($sp)                    # 4-byte Folded Spill
 	move	$fp, $sp
-	sw	$zero, 28($fp)
-	addiu	$1, $zero, 8
-	sw	$1, 24($fp)
-	addiu	$1, $zero, 20
-	sw	$1, 20($fp)
-	addiu	$4, $fp, 20
-	addiu	$5, $fp, 24
+	sw	$zero, 36($fp)
+	addiu	$4, $fp, 32
+	sw	$4, 24($fp)                     # 4-byte Folded Spill
+	jal	_Z10_input_intRi
+	nop
+	addiu	$4, $fp, 28
+	sw	$4, 20($fp)                     # 4-byte Folded Spill
+	jal	_Z10_input_intRi
+	nop
+	lw	$4, 20($fp)                     # 4-byte Folded Reload
+	lw	$5, 24($fp)                     # 4-byte Folded Reload
 	jal	_Z7get_sumRiS_
+	nop
+	lw	$4, 20($fp)                     # 4-byte Folded Reload
+	jal	_Z10_print_intRi
+	nop
+	lw	$4, 24($fp)                     # 4-byte Folded Reload
+	jal	_Z10_print_intRi
 	nop
 	addiu	$2, $zero, 0
 	move	$sp, $fp
-	lw	$fp, 32($sp)                    # 4-byte Folded Reload
-	lw	$ra, 36($sp)                    # 4-byte Folded Reload
-	addiu	$sp, $sp, 40
+	lw	$fp, 40($sp)                    # 4-byte Folded Reload
+	lw	$ra, 44($sp)                    # 4-byte Folded Reload
+	addiu	$sp, $sp, 48
 	jr	$ra
 	nop
 	.set	at
 	.set	macro
 	.set	reorder
 	.end	main
-$func_end1:
-	.size	main, ($func_end1)-main
+$func_end3:
+	.size	main, ($func_end3)-main
                                         # -- End function
 	.ident	"Homebrew clang version 16.0.3"
 	.section	".note.GNU-stack","",@progbits
 	.addrsig
+	.addrsig_sym _Z10_print_intRi
+	.addrsig_sym _Z10_input_intRi
 	.addrsig_sym _Z7get_sumRiS_
 	.text

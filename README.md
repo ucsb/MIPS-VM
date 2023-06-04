@@ -20,7 +20,7 @@ Building a custom VM for MIPS architecture.
 - [ ] Floats
 - [x] Arrays
 - [ ] String
-- [ ] Print Statements
+- [x] Print Statements
 
 # Execution of Byte Code
 - [x] Arithmetic & Logical Instructions

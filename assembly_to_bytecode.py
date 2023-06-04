@@ -46,7 +46,7 @@ def label_to_offset(label, program_counter, label_mapping):
 
 def label_to_program_counter(label, label_mapping):
     # Implement your logic to retrieve the address for the label here
-    return label_mapping[label]
+    return label_mapping.get(label, -1)
 
 def assemble_instruction(instr_segments, program_counter, label_mapping):
     operation = instr_segments[0]
@@ -92,8 +92,12 @@ def assemble_instruction(instr_segments, program_counter, label_mapping):
         rs = get_register(instr_segments[1])
         if operation == "jr":
             return encode_r_type(opcode, rs, 0, 0, 0, funct)
-        else: # Note this is jalr
+        if operation == "jalr":
             return encode_r_type(opcode, 0, 0, 31, 0, funct)
+        if operation == "mflo":
+            return encode_r_type(opcode, rs, 0, 0, 0, funct)
+        if operation == "mfhi":
+            return encode_r_type(opcode, rs, 0, 0, 0, funct)
     # I - type
     # Basic
     if operation in INSTRUCTION_CLASSIFICATION["I-type"]["basic"]:
@@ -128,6 +132,8 @@ def assemble_instruction(instr_segments, program_counter, label_mapping):
     # Basic
     if operation in INSTRUCTION_CLASSIFICATION["J-type"]["basic"]:
         address = label_to_program_counter(instr_segments[1], label_mapping)
+        if address == -1:
+            return None
         return encode_j_type(opcode, address)
 
 def preprocess_line(line):
@@ -207,9 +213,10 @@ def assemble_file(file_path):
                     break
             if not len(line):
                 continue
-            # print(line)
             instruction_segments = line.split()
             instruction_bytecode = assemble_instruction(instruction_segments, program_counter, label_mapping)
+            if instruction_bytecode is None:
+                continue
             # print(line)
             # print(f"{instruction_bytecode:08x}")
             program_instructions[program_counter] = instruction_bytecode
