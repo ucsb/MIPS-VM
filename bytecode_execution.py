@@ -203,9 +203,7 @@ def process_i_instr(operation):
         case "sh":
             memory_loc = rs_data + parse_immediate_val(im)
             for pos in range(2):
-                MEMORY_MAPPING[memory_loc + pos] = get_nth_byte(
-                    rd_data, 1 - pos
-                )
+                MEMORY_MAPPING[memory_loc + pos] = get_nth_byte(rd_data, 1 - pos)
         case "sb":
             memory_loc = rs_data + parse_immediate_val(im)
             MEMORY_MAPPING[memory_loc] = rd_data
@@ -245,7 +243,7 @@ def process_j_instr(
     print_char_func_addr,
     input_char_func_addr,
     get_string_func_addr,
-    input_int_array_func_addr
+    input_int_array_func_addr,
 ):
     global REG_DATA, MEMORY_MAPPING, STDOUT_VALUES, LABEL_MAPPING
     addr = REG_DATA["IR"] & 0x03FFFFFF
@@ -269,7 +267,9 @@ def process_j_instr(
             int_array_start_addr = REG_DATA["$a0"]
             array_length = REG_DATA["$a1"]
             for idx in range(array_length):
-                val = convert_to_signed(get_int(MEMORY_MAPPING, int_array_start_addr + (idx * 4)))
+                val = convert_to_signed(
+                    get_int(MEMORY_MAPPING, int_array_start_addr + (idx * 4))
+                )
                 print(val, end=" ")
                 STDOUT_VALUES.append(val)
             print()
@@ -301,14 +301,16 @@ def process_j_instr(
         elif addr == get_string_func_addr:
             if len(file_inputs) == 0:
                 input_str = input()
-                new_inputs = [len(input_str)+1] + [x for x in input_str+"\0"]
+                new_inputs = [len(input_str) + 1] + [x for x in input_str + "\0"]
                 file_inputs += new_inputs
         elif addr == input_int_array_func_addr:
             if len(file_inputs) == 0:
                 input_str = input()
                 new_inputs = [int(x) for x in input_str.split()]
                 if len(new_inputs) != REG_DATA["$a1"]:
-                    sys.exit(f"Expected {REG_DATA['$a1']} integers but received {len(new_inputs)} instead")
+                    sys.exit(
+                        f"Expected {REG_DATA['$a1']} integers but received {len(new_inputs)} instead"
+                    )
                 file_inputs += new_inputs
     elif operation not in INSTRUCTION_TYPES["J-type"]:
         print(f"Invalid / Unimplemented - J operation - {operation}")
@@ -376,7 +378,7 @@ def execute_code(
                 print_char_func_addr,
                 input_char_func_addr,
                 get_string_func_addr,
-                input_int_array_func_addr
+                input_int_array_func_addr,
             )
         # print_data()
     return STDOUT_VALUES

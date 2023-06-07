@@ -29,15 +29,19 @@ IGNORE_COMMANDS = [
     ".cfi_offset",
     ".cfi_endproc",
 ]
-TODO_COMMANDS = [".section", ".4byte", ".asciz"]
+TODO_COMMANDS = [".section", ".data", ".4byte", ".asciz"]
 
 
 def encode_r_type(op, rs, rt, rd, shamt, funct):
+    # print(
+    #     f"opcode: {op:0x}, rs: {rs:0x}, rt: {rt:0x}, rd: {rd:0x}, shamt: {shamt:0x}, funct: {funct:0x}"
+    # )
     instruction = op << 26 | rs << 21 | rt << 16 | rd << 11 | shamt << 6 | funct
     return instruction
 
 
 def encode_i_type(op, rs, rd, im):
+    # print(f"opcode: {op:0x}, rs: {rs:0x}, rd: {rd:0x}, immediate_val: {im:0x}")
     # converting negative value to signed 16 bit integer
     if im < 0:
         im = (1 << 16) + im
@@ -46,6 +50,7 @@ def encode_i_type(op, rs, rd, im):
 
 
 def encode_j_type(op, address):
+    # print(f"opcode: {op:0x}, address: {address:0x}")
     instruction = op << 26 | address
     return instruction
 
@@ -168,51 +173,52 @@ def preprocess_line(line):
     return line
 
 
-def preprocess_instructions(file_path):
+def preprocess_instructions(lines):
     label_mapping = {}
     memory_mapping = {}
     free_memory_pointer = MEMORY_POINTER_START
     next_program_counter = PROGRAM_COUNTER_START
     memory_read = False
-    with open(file_path, "r") as lines:
-        for line in lines:
-            line = preprocess_line(line)
-            if line.startswith(".section"):
-                if line.split()[1].startswith(".rodata"):
-                    memory_read = True
-                else:
-                    memory_read = False
-                continue
-            if line.startswith(".4byte"):
-                val = line.split()[1].strip()
-                if val.isdigit():
-                    val = int(val)
-                else:
-                    val = label_mapping[val.lstrip("(").rstrip(")")]
-                if (val & 0x80000000) > 0:
-                    val = val - (1 << 32)
-                save_int(memory_mapping, free_memory_pointer, val)
-                free_memory_pointer += 4
-                continue
-            if line.startswith(".asciz"):
-                val = line.split("	")[1].strip().replace('"', '')
-                for char in val + "\0":
-                    memory_mapping[free_memory_pointer] = ord(char)
-                    free_memory_pointer += 1
-                if free_memory_pointer % 4 != 0:
-                    free_memory_pointer = ((free_memory_pointer // 4) + 1) * 4
-                continue
-            if ":" in line:
-                label = line.split(":")[0]
-                if memory_read:
-                    label_mapping[label] = free_memory_pointer
-                else:
-                    label_mapping[label] = next_program_counter
-                line = line.split(":")[1].strip()
-            if not len(line):
-                continue
-            if not memory_read:
-                next_program_counter += 4
+    for line in lines:
+        line = preprocess_line(line)
+        if line.startswith(".section"):
+            if line.split()[1].startswith(".rodata"):
+                memory_read = True
+            else:
+                memory_read = False
+            continue
+        if line.startswith(".data"):
+            memory_read = True
+        if line.startswith(".4byte"):
+            val = line.split()[1].strip()
+            if val.isdigit():
+                val = int(val)
+            else:
+                val = label_mapping[val.lstrip("(").rstrip(")")]
+            if (val & 0x80000000) > 0:
+                val = val - (1 << 32)
+            save_int(memory_mapping, free_memory_pointer, val)
+            free_memory_pointer += 4
+            continue
+        if line.startswith(".asciz"):
+            val = line.split("	")[1].strip().replace('"', "")
+            for char in val + "\0":
+                memory_mapping[free_memory_pointer] = ord(char)
+                free_memory_pointer += 1
+            if free_memory_pointer % 4 != 0:
+                free_memory_pointer = ((free_memory_pointer // 4) + 1) * 4
+            continue
+        if ":" in line:
+            label = line.split(":")[0]
+            if memory_read:
+                label_mapping[label] = free_memory_pointer
+            else:
+                label_mapping[label] = next_program_counter
+            line = line.split(":")[1].strip()
+        if not len(line):
+            continue
+        if not memory_read:
+            next_program_counter += 4
     return label_mapping, memory_mapping
 
 
@@ -228,39 +234,46 @@ def process_functions(line, label_mapping):
     return line
 
 
-def assemble_file(file_path):
+def assemble_instructions(lines):
+    lines = lines.copy()
     encoded_instructions = {}
     program_instructions = {}
-    label_mapping, memory_mapping = preprocess_instructions(file_path)
+    label_mapping, memory_mapping = preprocess_instructions(lines)
     # print(label_mapping, memory_mapping)
     program_counter = PROGRAM_COUNTER_START
-    with open(file_path, "r") as lines:
-        for line in lines:
-            line = preprocess_line(line)
-            line = process_functions(line, label_mapping)
-            if ":" in line:
-                line = line.split(":")[1]
-            if line.startswith(".section	.rodata"):
-                break
-            elif line.startswith(".section"):
-                line = ''
-            if not len(line):
-                continue
-            # removing commas in the instructions
-            line = line.replace(",", " ").strip()
-            instruction_segments = line.split()
-            instruction_bytecode = assemble_instruction(
-                instruction_segments, program_counter, label_mapping
-            )
-            if instruction_bytecode is None:
-                continue
-            # print(line)
-            # print(f"{instruction_bytecode:08x}")
-            program_instructions[program_counter] = instruction_bytecode
-            encoded_instructions[program_counter] = line
-            # memory_mapping[program_counter] = instruction_bytecode
-            program_counter += 4
+    for line in lines:
+        line = preprocess_line(line)
+        line = process_functions(line, label_mapping)
+        if ":" in line:
+            line = line.split(":")[1]
+        if line.startswith(".section	.rodata"):
+            break
+        elif line.startswith(".section"):
+            line = ""
+        elif line.startswith(".data"):
+            break
+        if not len(line):
+            continue
+        # removing commas in the instructions
+        line = line.replace(",", " ").strip()
+        instruction_segments = line.split()
+        instruction_bytecode = assemble_instruction(
+            instruction_segments, program_counter, label_mapping
+        )
+        if instruction_bytecode is None:
+            continue
+        # print(line)
+        # print(f"{line} ====> {instruction_bytecode:08x}")
+        program_instructions[program_counter] = instruction_bytecode
+        encoded_instructions[program_counter] = line
+        # memory_mapping[program_counter] = instruction_bytecode
+        program_counter += 4
     return program_instructions, encoded_instructions, label_mapping, memory_mapping
+
+
+def assemble_file(file_path):
+    with open(file_path, "r") as lines:
+        return assemble_instructions(list(lines))
 
 
 if __name__ == "__main__":
