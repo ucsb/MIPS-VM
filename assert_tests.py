@@ -1,9 +1,9 @@
 from bytecode_execution import *
 
 #easy
-assert run_vm('tests/easy/auto_integers_basic_io.asm', [1, 2, 30])==[1,2,30]
 assert run_vm('tests/easy/auto_integers_arithmetic.asm', [4, 5, 6])==[0,10,5]
 assert run_vm('tests/easy/auto_integers_basic.asm', [1, 2, 3])==[1,2,3]
+assert run_vm('tests/easy/auto_integers_basic_io.asm', [1, 2, 30])==[1,2,30]
 assert run_vm('tests/easy/auto_integers_conditionals.asm', [5, 10])==[5,10,15]
 assert run_vm('tests/easy/auto_integers_logical.asm', [8,10])==[8, 27]
 assert run_vm('tests/easy/auto_integers_nested_conditions.asm', [4, 5, -8])==[5, 1, -10]
@@ -29,3 +29,4 @@ assert run_vm('tests/hard/auto_print_basic.asm',[5, 10, 15]) == [5, 10, 15]
 assert run_vm('tests/hard/auto_pointers_integers_basic.asm', []) == [25, 50, 75, 100]
 assert run_vm('tests/hard/auto_arrays_dynamic_integers.asm', [4, 5, 2, -3, 1]) == [25, 4, 9, 1]
 assert run_vm('tests/hard/auto_print_arrays_integers.asm', [4, 5, 2, -3, 1]) == [25, 4, 9, 1]
+assert run_vm('tests/hard/auto_strings_input.asm', [14, 'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!', '\0']) == ['Enter the string to be stored:\n', 'The entered string is:\n', 'Hello, World!', '\n']

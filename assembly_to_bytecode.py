@@ -1,19 +1,41 @@
 from util.mappings import *
+from util.common import *
 import sys
 import os
 import re
 
-IGNORE_COMMANDS = [".text", ".abicalls", ".option", ".nan", ".file",
-                   ".globl", ".p2align", ".type", ".set", ".ent",
-                   ".end", ".size", ".ident", ".addrsig", ".frame",
-                   ".mask", ".fmask", ".cfi_def_cfa_register",
-                   ".cfi_startproc", ".cfi_def_cfa_offset",
-                   ".cfi_offset", ".cfi_endproc"]
-TODO_COMMANDS = [".section", ".4byte"]
+IGNORE_COMMANDS = [
+    ".text",
+    ".abicalls",
+    ".option",
+    ".nan",
+    ".file",
+    ".globl",
+    ".p2align",
+    ".type",
+    ".set",
+    ".ent",
+    ".end",
+    ".size",
+    ".ident",
+    ".addrsig",
+    ".addrsig_sym",
+    ".frame",
+    ".mask",
+    ".fmask",
+    ".cfi_def_cfa_register",
+    ".cfi_startproc",
+    ".cfi_def_cfa_offset",
+    ".cfi_offset",
+    ".cfi_endproc",
+]
+TODO_COMMANDS = [".section", ".4byte", ".asciz"]
+
 
 def encode_r_type(op, rs, rt, rd, shamt, funct):
     instruction = op << 26 | rs << 21 | rt << 16 | rd << 11 | shamt << 6 | funct
     return instruction
+
 
 def encode_i_type(op, rs, rd, im):
     # converting negative value to signed 16 bit integer
@@ -22,31 +44,35 @@ def encode_i_type(op, rs, rd, im):
     instruction = op << 26 | rs << 21 | rd << 16 | im
     return instruction
 
+
 def encode_j_type(op, address):
     instruction = op << 26 | address
     return instruction
+
 
 def get_register(reg_str):
     if reg_str in REGISTER_MAPPING:
         return REGISTER_MAPPING[reg_str]
     return REGISTER_MAPPING[REVERSE_REGISTER_MAPPING[int(reg_str.strip("$"))]]
 
+
 def get_immediate_val(imm_str):
     return int(imm_str) if "x" not in imm_str else int(imm_str, 16)
 
-def get_mem(addr_str, memory_mapping):
-    return memory_mapping[addr_str]
-
-def set_mem(addr_str, val, memory_mapping):
-    memory_mapping[addr_str] = val
 
 def label_to_offset(label, program_counter, label_mapping):
     # Implement your logic to calculate the offset here
-    return (label_to_program_counter(label, label_mapping) >> 2) - (program_counter >> 2) - 1
+    return (
+        (label_to_program_counter(label, label_mapping) >> 2)
+        - (program_counter >> 2)
+        - 1
+    )
+
 
 def label_to_program_counter(label, label_mapping):
     # Implement your logic to retrieve the address for the label here
     return label_mapping.get(label, -1)
+
 
 def assemble_instruction(instr_segments, program_counter, label_mapping):
     operation = instr_segments[0]
@@ -72,7 +98,7 @@ def assemble_instruction(instr_segments, program_counter, label_mapping):
     opcode, funct = INSTRUCTION_MAPPING.get(operation, (None, None))
     # Parsing
     if opcode is None:
-        exit("invalid operation - {}".format(operation))
+        sys.exit("invalid operation - {}".format(operation))
     # R - type
     # Basic
     if operation in INSTRUCTION_CLASSIFICATION["R-type"]["basic"]:
@@ -90,13 +116,9 @@ def assemble_instruction(instr_segments, program_counter, label_mapping):
     # Jump
     if operation in INSTRUCTION_CLASSIFICATION["R-type"]["jump"]:
         rs = get_register(instr_segments[1])
-        if operation == "jr":
-            return encode_r_type(opcode, rs, 0, 0, 0, funct)
         if operation == "jalr":
             return encode_r_type(opcode, 0, 0, 31, 0, funct)
-        if operation == "mflo":
-            return encode_r_type(opcode, rs, 0, 0, 0, funct)
-        if operation == "mfhi":
+        else:
             return encode_r_type(opcode, rs, 0, 0, 0, funct)
     # I - type
     # Basic
@@ -136,14 +158,15 @@ def assemble_instruction(instr_segments, program_counter, label_mapping):
             return None
         return encode_j_type(opcode, address)
 
+
 def preprocess_line(line):
     # Remove leading/trailing whitespaces/comments/commas
     line = line.split("#")[0].strip()
-    line = line.replace(",", " ").strip()
     for command in IGNORE_COMMANDS:
         if line.startswith(command):
             return ""
     return line
+
 
 def preprocess_instructions(file_path):
     label_mapping = {}
@@ -168,8 +191,16 @@ def preprocess_instructions(file_path):
                     val = label_mapping[val.lstrip("(").rstrip(")")]
                 if (val & 0x80000000) > 0:
                     val = val - (1 << 32)
-                memory_mapping[free_memory_pointer] = val
+                save_int(memory_mapping, free_memory_pointer, val)
                 free_memory_pointer += 4
+                continue
+            if line.startswith(".asciz"):
+                val = line.split("	")[1].strip().replace('"', '')
+                for char in val + "\0":
+                    memory_mapping[free_memory_pointer] = ord(char)
+                    free_memory_pointer += 1
+                if free_memory_pointer % 4 != 0:
+                    free_memory_pointer = ((free_memory_pointer // 4) + 1) * 4
                 continue
             if ":" in line:
                 label = line.split(":")[0]
@@ -184,16 +215,18 @@ def preprocess_instructions(file_path):
                 next_program_counter += 4
     return label_mapping, memory_mapping
 
+
 def process_functions(line, label_mapping):
-    label_matches = re.findall(r'%hi\((.*?)\)', line)
+    label_matches = re.findall(r"%hi\((.*?)\)", line)
     for label in label_matches:
         val = (label_mapping[label] >> 16) & 0xFFFF
         line = line.replace("%hi({})".format(label), str(val))
-    label_matches = re.findall(r'%lo\((.*?)\)', line)
+    label_matches = re.findall(r"%lo\((.*?)\)", line)
     for label in label_matches:
         val = label_mapping[label] & 0xFFFF
         line = line.replace("%lo({})".format(label), str(val))
     return line
+
 
 def assemble_file(file_path):
     encoded_instructions = {}
@@ -207,14 +240,18 @@ def assemble_file(file_path):
             line = process_functions(line, label_mapping)
             if ":" in line:
                 line = line.split(":")[1]
-            for command in TODO_COMMANDS:
-                if line.startswith(command):
-                    line = ""
-                    break
+            if line.startswith(".section	.rodata"):
+                break
+            elif line.startswith(".section"):
+                line = ''
             if not len(line):
                 continue
+            # removing commas in the instructions
+            line = line.replace(",", " ").strip()
             instruction_segments = line.split()
-            instruction_bytecode = assemble_instruction(instruction_segments, program_counter, label_mapping)
+            instruction_bytecode = assemble_instruction(
+                instruction_segments, program_counter, label_mapping
+            )
             if instruction_bytecode is None:
                 continue
             # print(line)
@@ -225,6 +262,7 @@ def assemble_file(file_path):
             program_counter += 4
     return program_instructions, encoded_instructions, label_mapping, memory_mapping
 
+
 if __name__ == "__main__":
     test_dirs = sys.argv[1:]
     for test_dir in test_dirs:
@@ -233,9 +271,14 @@ if __name__ == "__main__":
         else:
             test_files = [test_dir]
         for test_file in test_files:
-            print("FileName: ", test_file)
-            program_instructions, encoded_instructions, label_mapping, memory_mapping = assemble_file(test_file)
-            for program_counter in program_instructions:
-                print(f"{encoded_instructions[program_counter]}  ===> {program_instructions[program_counter]:08x}")
-            print("LabelMapping: ",label_mapping)
+            # print("FileName: ", test_file)
+            (
+                program_instructions,
+                encoded_instructions,
+                label_mapping,
+                memory_mapping,
+            ) = assemble_file(test_file)
+            # for program_counter in program_instructions:
+            #     print(f"{encoded_instructions[program_counter]}  ===> {program_instructions[program_counter]:08x}")
+            print("LabelMapping: ", label_mapping)
             print("Memory Mapping: ", memory_mapping)

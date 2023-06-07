@@ -4,10 +4,7 @@ void _input_int(int& x){
 void _print_int(int& x){
 }
 
-void _print_array(int *array, int size){
-    for(int i=0; i<size; i++){
-        _print_int(array[i]);
-    }
+void _print_int_array(int *array, int size){
 }
 
 int main(){
@@ -25,5 +22,5 @@ int main(){
     // for(int i=0; i<size; i++){
     //     _print_int(array[i]);
     // }
-    _print_array(array, size);
+    _print_int_array(array, size);
 }

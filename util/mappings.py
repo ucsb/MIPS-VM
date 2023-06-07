@@ -168,8 +168,15 @@ INSTRUCTION_MAPPING = {
 
     # load
     "lui": (0x0F, None),
+    "lh": (0x21, None),
+    "lwl": (0x22, None),
     "lw": (0x23, None),
+    "lhu": (0x25, None),
+    "lwr": (0x26, None),
+    "sh": (0x29, None),
+    "swl": (0x2A, None),
     "sw": (0x2B, None),
+    "swr": (0x2E, None),
     "lb": (0x20, None),
     "lbu": (0x24, None),
     "sb": (0x28, None),
@@ -192,7 +199,7 @@ INSTRUCTION_MAPPING = {
 
 INSTRUCTION_TYPES = {
     "R-type": ['add', 'addu', 'sub', 'subu', 'slt', 'sltu', 'and', 'or', 'xor', 'nor', 'sll', 'srl', 'sra', 'sllv', 'srlv', 'srav', 'jr', 'jalr', 'movn', 'mul', 'div', 'mfhi', 'mflo'],
-    "I-type": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori', 'lui', 'lw', 'sw', 'lb', 'lbu', 'sb', 'beq', 'bne', 'bgez', 'bgtz', 'blez', 'bltz', 'teq'],
+    "I-type": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori', 'lui', 'lw', 'sw', 'lb', 'lbu', 'sb', 'beq', 'bne', 'bgez', 'bgtz', 'blez', 'bltz', 'teq', 'lwl', 'lwr', 'swl', 'swr', 'sh', 'lh', 'lhu'],
     "J-type": ['j', 'jal']
 }
 
@@ -204,7 +211,7 @@ INSTRUCTION_CLASSIFICATION = {
     },
     "I-type": {
         "basic": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori', 'teq'],
-        "memory": ['lui', 'lw', 'sw', 'lb', 'lbu', 'sb'],
+        "memory": ['lui', 'lw', 'sw', 'lb', 'lbu', 'sb', 'lwl', 'lwr', 'swl', 'swr', 'sh', 'lh', 'lhu'],
         "branch": ['beq', 'bne', 'bgez', 'bgtz', 'blez', 'bltz']
     },
     "J-type": {
