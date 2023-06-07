@@ -2,9 +2,10 @@
 import os
 
 def generate_asm_file(input_file, output_file):
-    status = os.system(f"clang++ -S -target mips -mcpu=mips32 {input_file} -o {output_file}")
+    status = os.system(f"clang++ -S -target mips -mcpu=mips32 -Wno-writable-strings {input_file} -o {output_file}")
     if status == 0:
-        print(f"Successfully generated asm file for {input_file}")
+        # print(f"Successfully generated asm file for {input_file}")
+        pass
     else:
         print(f"Error in generating asm file for {input_file}")
 

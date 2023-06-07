@@ -9,6 +9,7 @@ Building a custom VM for MIPS architecture.
 #### python assembly_to_bytecode.py tests/easy/auto_integers_basic.asm
 - For executing bytecode
 #### python bytecode_execution.py --asm tests/demo/auto_binary_search.asm
+#### python bytecode_execution.py --source examples/demo/reverse_string.cpp
 - Example assert statement
 #### assert run_vm("tests/easy/auto_integers_basic_io.asm", [8, 20, -5]) == [8, 20, -5]
 
