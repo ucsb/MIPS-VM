@@ -50,6 +50,7 @@ def get_int(memory_mapping, memory_loc):
 
 
 def save_int(memory_mapping, memory_loc, value):
+    # the value is stored in memory_loc 
     # print(f"Called to save - {value} at loc - {memory_loc}")
     for pos in range(4):
         memory_mapping[memory_loc + pos] = get_nth_byte(value, 3 - pos)

@@ -1,5 +1,10 @@
 from bytecode_execution import *
 
+"""
+Assert statments on the asm files stored under tests with inputs and expected outputs.
+run_vm() function assembles the file and executes the corresponding bytecode.
+"""
+
 # easy
 assert run_vm("tests/easy/auto_integers_arithmetic.asm", [4, 5, 6]) == [0, 10, 5]
 assert run_vm("tests/easy/auto_integers_basic.asm", [1, 2, 3]) == [1, 2, 3]
