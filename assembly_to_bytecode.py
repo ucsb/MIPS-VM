@@ -37,20 +37,32 @@ The following directives are parsed to handle data.
 """
 TODO_COMMANDS = [".section", ".data", ".4byte", ".asciz"]
 
-"""
-Returns byte-code for R-type instruction
-"""
+
 def encode_r_type(op, rs, rt, rd, shamt, funct):
+    """
+    params: op (int) - opcode for R-type instructions
+            rs (int) - operand register
+            rt (int) - operand register
+            rd (int) - dest register
+            shamt(int) - 5 bit shamt (shift amount) value
+            funct(int) - 6 bit funct value
+    Returns byte-code for R-type instruction
+    """
     # print(
     #     f"opcode: {op:0x}, rs: {rs:0x}, rt: {rt:0x}, rd: {rd:0x}, shamt: {shamt:0x}, funct: {funct:0x}"
     # )
     instruction = op << 26 | rs << 21 | rt << 16 | rd << 11 | shamt << 6 | funct
     return instruction
 
-"""
-Returns byte-code for I-type instruction
-"""
+
 def encode_i_type(op, rs, rd, im):
+    """
+    params: op (int) - opcode for I-type instructions
+        rs (int) - operand register
+        rd (int) - dest register
+        im (int) - immediate value that serves as operand.
+    Returns byte-code for I-type instruction
+    """
     # print(f"opcode: {op:0x}, rs: {rs:0x}, rd: {rd:0x}, immediate_val: {im:0x}")
     # converting negative value to signed 16 bit integer
     if im < 0:
@@ -58,22 +70,30 @@ def encode_i_type(op, rs, rd, im):
     instruction = op << 26 | rs << 21 | rd << 16 | im
     return instruction
 
-"""
-Returns byte-code for J-type instruction
-"""
+
 def encode_j_type(op, address):
+    """
+    params: op (int) - opcode for J-type instructions
+            address(int) - target address for jump 
+    Returns byte-code for J-type instruction
+    """
     # print(f"opcode: {op:0x}, address: {address:0x}")
     instruction = op << 26 | address
     return instruction
 
 
 def get_register(reg_str):
+    """
+    param: reg_str (str) - String representing register name
+    returns: number associated with the register name
+    """
     if reg_str in REGISTER_MAPPING:
         return REGISTER_MAPPING[reg_str]
     return REGISTER_MAPPING[REVERSE_REGISTER_MAPPING[int(reg_str.strip("$"))]]
 
 
 def get_immediate_val(imm_str):
+    #converts imm_str to int and returns the same based on decimal representation or hex representation.
     return int(imm_str) if "x" not in imm_str else int(imm_str, 16)
 
 
@@ -92,6 +112,26 @@ def label_to_program_counter(label, label_mapping):
 
 
 def assemble_instruction(instr_segments, program_counter, label_mapping):
+    """
+    params: instr_segments(List) - asm instruction. Eg: ['add','$t1','$t2','$t3']
+            program_counter - A hexadecimal value
+            label_mapping (Dictionary) - Dictionary that maps label names to their instruction address
+    
+    The function processes the instruction segments, and based on the INSTRUCTION_CLASSIFICATION, the instructions
+    are encoded by calling encode_r_type(), encode_i_type(), encode_j_type() functions with appropriate parameters
+    
+    helper_functions:
+    - get_register() - to get int value associated with a register name
+    - get_immediate_val() - to get value represented by the immediate_val bits i-type instructions
+    - label_to_offset() - to calculate the offset for label
+    - label_to_program_counter - get the instruction address
+    - encode_r_type() - to encode R-type instruction 
+    - encode_i_type() - to encode I-type instruction 
+    - encode_j_type() - to encode J-type instruction 
+            
+    returns: Bytecode for the instruction (32 bit) represented by a hexadecimal value.
+    
+    """
     operation = instr_segments[0]
     # handling nop instruction
     if operation == "nop":
@@ -186,6 +226,18 @@ def preprocess_line(line):
 
 
 def preprocess_instructions(lines):
+    """
+    Processes asm instructions for labels and data.
+    params: line(List) - List of asm instructions of a program.
+    
+    The functions checks if an instruction line contains .rodata, .data, .4byte, .asciz directives to identify and read data variables.
+    memory_mapping stores the mapping between var address and values.
+    
+    It check for the presence of ':' to identify labels and create label mapping. For variables, the label_mapping maps var names to their address.
+    
+    returns: label_mapping - Dictionary that maps label names to their instruction address
+            memory_mapping - Dictionary that maps var address to their values.
+    """
     label_mapping = {}
     memory_mapping = {}
     free_memory_pointer = MEMORY_POINTER_START
@@ -248,11 +300,19 @@ def process_functions(line, label_mapping):
 
 def assemble_instructions(lines):
     """
-    params: line - List of asm instructions of a program.
+    params: line(List) - List of asm instructions of a program.
+    
+    The function processes the List of instructions for a program. Label mapping and memory mapping are created and
+    every instruction is converted to bytecode and stored in program_instructions datastructure.
+    
+    helper functions:
+    preprocess_line() - to remove leading/trailing whitespaces/comments/commas
+    assemble_instruction() - To generate bytecode for individual instructions.
+    
     returns: 
-            program_instructions - Dictionary that maps instruction address to bytecode ,
+            program_instructions - Dictionary that maps instruction address to bytecode and can be access through PC,
             encoded_instructions - Dictionary that maps instruction address to asm instruction
-            label_mapping - Dictionary that maps label names to their instruction offset
+            label_mapping - Dictionary that maps label names to their instruction address
             memory_mapping - Dictionary that maps var address to their values.
     """
     lines = lines.copy()
