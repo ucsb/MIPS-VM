@@ -1,3 +1,8 @@
+"""
+REGISTER_MAPPING
+type: dictionary
+Maps register names to their integer values. Used to represent registers in bytecode.
+"""
 REGISTER_MAPPING = {
     "$zero": 0,
     "$at": 1, # Assembler Temp Register 
@@ -37,6 +42,12 @@ REGISTER_MAPPING = {
     "IR": 35 # Instruction Register
 }
 
+"""
+REVERSE_REGISTER_MAPPING
+type: Dictionary
+Maps register values to their corresponding names. Used in processing bytecodes and storing values in corresponding 
+registers.
+"""
 REVERSE_REGISTER_MAPPING = {
     y: x for x, y in REGISTER_MAPPING.items()
 }
@@ -114,6 +125,11 @@ REVERSE_REGISTER_MAPPING = {
 # j     000010 addr    PC={(PC+4)[31:28],addr,00}
 # jal   000011 addr    $31=PC; PC={(PC+4)[31:28],addr,00}
 # $31 is ra register
+"""
+INSTRUCTION_MAPPING
+type: Dictionary
+Maps instructions to the tuple (opcode, Funct)
+"""
 
 INSTRUCTION_MAPPING = {
     # R-Type instructions
@@ -202,6 +218,12 @@ INSTRUCTION_TYPES = {
     "I-type": ['addi', 'addiu', 'slti', 'sltiu', 'andi', 'ori', 'xori', 'lui', 'lw', 'sw', 'lb', 'lbu', 'sb', 'beq', 'bne', 'bgez', 'bgtz', 'blez', 'bltz', 'teq', 'lwl', 'lwr', 'swl', 'swr', 'sh', 'lh', 'lhu'],
     "J-type": ['j', 'jal']
 }
+
+"""
+INSTRUCTION_CLASSIFICATION
+type: Dictionary
+Classification of instructions to subgroups within R-type, I-type and J-type instructions.
+"""
 
 INSTRUCTION_CLASSIFICATION = {
     "R-type": {
