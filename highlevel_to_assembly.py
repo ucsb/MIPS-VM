@@ -2,6 +2,9 @@
 import os
 
 
+"""
+Generates .asm file represented by output_file from C++ input_file  using clang cross compiler
+"""
 def generate_asm_file(input_file, output_file):
     status = os.system(
         f"clang++ -S -target mips -mcpu=mips32 -Wno-writable-strings {input_file} -o {output_file}"
@@ -12,7 +15,9 @@ def generate_asm_file(input_file, output_file):
     else:
         print(f"Error in generating asm file for {input_file}")
 
-
+"""
+Traverses the directory input_dir and converts every C++ file to asm file under the output_dir 
+"""
 def generate_asm_files(input_dir="examples/easy", output_dir="tests/easy"):
     # Note: This won't generate files recursively
     if not os.path.exists(output_dir):

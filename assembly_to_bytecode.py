@@ -4,6 +4,9 @@ import sys
 import os
 import re
 
+"""
+The directives in the IGNORE_COMMANDS are ignored and are not processed as part of assembler.
+"""
 IGNORE_COMMANDS = [
     ".text",
     ".abicalls",
@@ -29,9 +32,14 @@ IGNORE_COMMANDS = [
     ".cfi_offset",
     ".cfi_endproc",
 ]
+"""
+The following directives are parsed to handle data.
+"""
 TODO_COMMANDS = [".section", ".data", ".4byte", ".asciz"]
 
-
+"""
+Returns byte-code for R-type instruction
+"""
 def encode_r_type(op, rs, rt, rd, shamt, funct):
     # print(
     #     f"opcode: {op:0x}, rs: {rs:0x}, rt: {rt:0x}, rd: {rd:0x}, shamt: {shamt:0x}, funct: {funct:0x}"
@@ -39,7 +47,9 @@ def encode_r_type(op, rs, rt, rd, shamt, funct):
     instruction = op << 26 | rs << 21 | rt << 16 | rd << 11 | shamt << 6 | funct
     return instruction
 
-
+"""
+Returns byte-code for I-type instruction
+"""
 def encode_i_type(op, rs, rd, im):
     # print(f"opcode: {op:0x}, rs: {rs:0x}, rd: {rd:0x}, immediate_val: {im:0x}")
     # converting negative value to signed 16 bit integer
@@ -48,7 +58,9 @@ def encode_i_type(op, rs, rd, im):
     instruction = op << 26 | rs << 21 | rd << 16 | im
     return instruction
 
-
+"""
+Returns byte-code for J-type instruction
+"""
 def encode_j_type(op, address):
     # print(f"opcode: {op:0x}, address: {address:0x}")
     instruction = op << 26 | address
@@ -235,6 +247,14 @@ def process_functions(line, label_mapping):
 
 
 def assemble_instructions(lines):
+    """
+    params: line - List of asm instructions of a program.
+    returns: 
+            program_instructions - Dictionary that maps instruction address to bytecode ,
+            encoded_instructions - Dictionary that maps instruction address to asm instruction
+            label_mapping - Dictionary that maps label names to their instruction offset
+            memory_mapping - Dictionary that maps var address to their values.
+    """
     lines = lines.copy()
     encoded_instructions = {}
     program_instructions = {}
@@ -272,6 +292,14 @@ def assemble_instructions(lines):
 
 
 def assemble_file(file_path):
+    """
+    param: file_path(str) - asm file to be assembled
+    return:
+                program_instructions - Dictionary that maps instruction address to bytecode ,
+                encoded_instructions - Dictionary that maps instruction address to asm instruction
+                label_mapping - Dictionary that maps label names to their instruction offset
+                memory_mapping - Dictionary that maps var address to their values.
+    """
     with open(file_path, "r") as lines:
         return assemble_instructions(list(lines))
 
