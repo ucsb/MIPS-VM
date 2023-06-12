@@ -76,7 +76,6 @@ def process_r_instr(operation):
         case "sltu":
             REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = 1 if (rs_data < rt_data) else 0
         case "and":
-            # TODO: Deal with unsigned
             REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rs_data & rt_data
         case "or":
             REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rs_data | rt_data
@@ -92,14 +91,12 @@ def process_r_instr(operation):
         case "srl":
             REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rt_data >> shamt
         case "sra":
-            # TODO: Sign should be preserved
             REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rt_data >> shamt
         case "sllv":
             REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rt_data << rs_data
         case "srlv":
             REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rt_data >> rs_data
         case "srav":
-            # TODO: Sign should be preserved
             REG_DATA[REVERSE_REGISTER_MAPPING[rd]] = rt_data >> rs_data
         case "jr":
             REG_DATA["PC"] = rs_data

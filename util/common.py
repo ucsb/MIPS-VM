@@ -30,6 +30,9 @@ def get_nth_byte(val, pos):
 
 
 def replace_nth_byte(data, reqd_val, pos):
+    """
+    Function to add the reqd val at the given pos in the data
+    """
     # first nullify the value at nth byte to 0
     eight_ones = (1 << 8) - 1
     ones_at_reqd_pos = eight_ones << (pos * 8)
@@ -42,6 +45,9 @@ def replace_nth_byte(data, reqd_val, pos):
 
 
 def get_int(memory_mapping, memory_loc):
+    """
+    Function to get the integer by reading up from the 4 byte addressed locations
+    """
     ans = 0
     for pos in range(4):
         ans += memory_mapping[memory_loc + pos] << ((3 - pos) * 8)
@@ -50,6 +56,9 @@ def get_int(memory_mapping, memory_loc):
 
 
 def save_int(memory_mapping, memory_loc, value):
+    """
+    Function to save the integer by storing in the 4 byte addressed locations
+    """
     # the value is stored in memory_loc 
     # print(f"Called to save - {value} at loc - {memory_loc}")
     for pos in range(4):
@@ -59,6 +68,9 @@ def save_int(memory_mapping, memory_loc, value):
 
 
 def get_chars_in_int(val):
+    """
+    Function to retrieve character conversion from a 4 byte integer
+    """
     ans = []
     for pos in range(4):
         ans.append(chr(get_nth_byte(val, 3 - pos)))

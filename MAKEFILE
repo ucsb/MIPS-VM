@@ -1,2 +1,4 @@
+build:
+	python3 highlevel_to_assembly.py
 test:
 	python3 assert_tests.py

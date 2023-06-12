@@ -35,7 +35,7 @@ IGNORE_COMMANDS = [
 """
 The following directives are parsed to handle data.
 """
-TODO_COMMANDS = [".section", ".data", ".4byte", ".asciz"]
+DATA_COMMANDS = [".section", ".data", ".4byte", ".asciz"]
 
 
 def encode_r_type(op, rs, rt, rd, shamt, funct):
@@ -58,9 +58,9 @@ def encode_r_type(op, rs, rt, rd, shamt, funct):
 def encode_i_type(op, rs, rd, im):
     """
     params: op (int) - opcode for I-type instructions
-        rs (int) - operand register
-        rd (int) - dest register
-        im (int) - immediate value that serves as operand.
+            rs (int) - operand register
+            rd (int) - dest register
+            im (int) - immediate value that serves as operand.
     Returns byte-code for I-type instruction
     """
     # print(f"opcode: {op:0x}, rs: {rs:0x}, rd: {rd:0x}, immediate_val: {im:0x}")
@@ -93,12 +93,12 @@ def get_register(reg_str):
 
 
 def get_immediate_val(imm_str):
-    #converts imm_str to int and returns the same based on decimal representation or hex representation.
+    # converts imm_str to int and returns the same based on decimal representation or hex representation.
     return int(imm_str) if "x" not in imm_str else int(imm_str, 16)
 
 
 def label_to_offset(label, program_counter, label_mapping):
-    # Implement your logic to calculate the offset here
+    # logic to compute the offset from the current line through label
     return (
         (label_to_program_counter(label, label_mapping) >> 2)
         - (program_counter >> 2)
@@ -107,7 +107,7 @@ def label_to_offset(label, program_counter, label_mapping):
 
 
 def label_to_program_counter(label, label_mapping):
-    # Implement your logic to retrieve the address for the label here
+    # logic to retrieve the address for the label here
     return label_mapping.get(label, -1)
 
 
@@ -246,6 +246,7 @@ def preprocess_instructions(lines):
     for line in lines:
         line = preprocess_line(line)
         if line.startswith(".section"):
+            # adding an indicator to point memory read
             if line.split()[1].startswith(".rodata"):
                 memory_read = True
             else:
@@ -254,10 +255,12 @@ def preprocess_instructions(lines):
         if line.startswith(".data"):
             memory_read = True
         if line.startswith(".4byte"):
+            # parsing integer
             val = line.split()[1].strip()
             if val.isdigit():
                 val = int(val)
             else:
+                # checking the case where we are referring to labels
                 val = label_mapping[val.lstrip("(").rstrip(")")]
             if (val & 0x80000000) > 0:
                 val = val - (1 << 32)
@@ -265,6 +268,7 @@ def preprocess_instructions(lines):
             free_memory_pointer += 4
             continue
         if line.startswith(".asciz"):
+            # adding logic to parse characters
             val = line.split("	")[1].strip().replace('"', "")
             for char in val + "\0":
                 memory_mapping[free_memory_pointer] = ord(char)
@@ -287,6 +291,8 @@ def preprocess_instructions(lines):
 
 
 def process_functions(line, label_mapping):
+    # function to replace %hi(label) or %lo(label) with 
+    # corresponding addresses before processing instruction
     label_matches = re.findall(r"%hi\((.*?)\)", line)
     for label in label_matches:
         val = (label_mapping[label] >> 16) & 0xFFFF
