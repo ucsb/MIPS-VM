@@ -1,3 +1,8 @@
+/*
+Functions used to input and print integers, array of int,
+char, string (array of char) instead of cin and cout.
+*/
+
 void _input_char(char& x){
 }
 
