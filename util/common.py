@@ -14,7 +14,7 @@ def convert_to_unsigned(val):
 
 
 def convert_to_signed(val):
-    # converts to an unsigned value - 32 bit
+    # converts to a signed value - 32 bit
     if val & 0x80000000:
         val -= 1 << 32
     return val

@@ -12,6 +12,14 @@ LABEL_MAPPING = {}
 
 
 def get_operation_type():
+    """
+    params: None
+    
+    The function fetches the instruction by referring to the InstructionRegister(IR) and fetches the opcode.
+    Based on the opcodes and other bit values, it returns the operation by reverse referencing the INSTRUCTION_MAPPING.
+    
+    returns: operation(str) - Eg: 'add', 'addi'
+    """
     global REG_DATA
     rev_instr_mapping = {y: x for x, y in INSTRUCTION_MAPPING.items()}
     op = (REG_DATA["IR"] & 0xFC000000) >> 26
@@ -29,6 +37,17 @@ def get_operation_type():
 
 
 def process_r_instr(operation):
+    """
+    param: operation(str) - string representing the operation to be performed.  Eg: add.
+    
+    The function fetches the operand and destination registers, performs the operation on the data held by the operand registers and 
+    updates the value of the destination register. The register data is represented by REG_DATA.
+    
+    helper_functions:
+    - convert_to_signed() - Converts the values stored in the registers to a signed value.
+    
+    returns: None
+    """
     global REG_DATA, MEMORY_MAPPING
     rs = (REG_DATA["IR"] & 0x03E00000) >> 21
     rt = (REG_DATA["IR"] & 0x001F0000) >> 16
@@ -97,6 +116,23 @@ def process_r_instr(operation):
 
 
 def process_i_instr(operation):
+    """
+    param: operation(str) - string representing the operation to be performed.  Eg: addi, lwl.
+    
+    The function fetches the register operands and immediate value from the bytecode and performs the operation on the data held by the operand register and immediate value and 
+    updates the value of the destination register. The register data is represented by REG_DATA.
+    
+    For the memory operations such as lwl, lwr etc, the operand register and immediate value is used to calculate the memory_location and 
+    the dest register value is updated based on the data fetched from these memory locations.
+    
+    helper_functions:
+    - convert_to_signed() - Converts the values stored in the registers to a signed value.
+    - parse_immediate_val() - to get the signed value
+    - replace_nth_byte() - To replace specific bytes of a register with the data stored in memory_location
+    - get_int() - to get the integer data stored in memory
+    
+    returns: None
+    """
     global REG_DATA, MEMORY_MAPPING
     rs = (REG_DATA["IR"] & 0x03E00000) >> 21
     rd = (REG_DATA["IR"] & 0x001F0000) >> 16
@@ -245,6 +281,31 @@ def process_j_instr(
     get_string_func_addr,
     input_int_array_func_addr,
 ):
+    """
+    params: operation(str) - string representing the operation to be performed.  Eg: addi, lwl.
+            file_inputs(List) - List of inputs to the program (command line). If no command line inputs are provided, this list would be empty.
+            print_int_func_addr(int) - address of the function print_int()
+            input_int_func_addr(int) - address of the function input_int()
+            print_int_array_func_addr(int) - address of the function print_int_array()
+            print_string_func_addr(int) - address of the function print_string()
+            print_char_func_addr(int) - address of the function print_char()
+            input_char_func_addr(int) - address of the function input_char()
+            get_string_func_addr(int) - address of the function get_string()
+            input_int_array_func_addr(int) - address of the function input_int_array()
+    
+    For 'j' instruction, the function updates the Program Counter to the jump address present in bytecode
+    For 'jal' instruction, the function checks the address in the bycode with that of I/O function addresses.
+    
+    If there is a match:
+        For Input functions:
+            it either reads from the file_input if its not empty or takes input from the user at the runtime.
+            Saves the value in the memory.
+        For output functions:
+            fetches the value from memory, then prints and appends the value to STD_OUT. 
+    
+    returns: None 
+    """
+    
     global REG_DATA, MEMORY_MAPPING, STDOUT_VALUES, LABEL_MAPPING
     addr = REG_DATA["IR"] & 0x03FFFFFF
     # print(f'J-type instr: op : {operation}, addr : {addr}')
@@ -318,6 +379,7 @@ def process_j_instr(
 
 
 def print_data():
+    # prints the register values and the memory data
     global REG_DATA, MEMORY_MAPPING
     print("Registers' data")
     print(REG_DATA)
@@ -326,6 +388,7 @@ def print_data():
 
 
 def get_label_addr(func_name):
+    #returns the address corresponding to the func_name label in LABEL_MAPPING 
     global LABEL_MAPPING
     labels = [key for key in LABEL_MAPPING if func_name in key]
     if len(labels):
@@ -340,6 +403,28 @@ def execute_code(
     encoded_instructions,
     file_inputs,
 ):
+    """
+    params: 
+        memory_mapping(Dict) - Dictionary that maps var address to their values.
+        label_mapping(Dict) - Dictionary that maps label names to their instruction address
+        program_instructions(Dict) - Dictionary that maps instruction address to bytecode and can be access through PC
+        encoded_instructions(Dict) - Dictionary that maps instruction address to asm instruction
+        file_inputs (List) - List of inputs to the program (command line). If no command line inputs are provided, this list would be empty.
+    
+    The executes every instruction represented in bytecode with the help of the following helper functions to fetch and process the operations. 
+    It uses the function get_label_addr() to fetch the label address for I/O functions and these addresses are passed as arguments for process_j_instr() where the I/O handling takes place.
+    
+    helper_functions:
+    - get_label_addr() - to get the function label address for I/O functions such as _input_int()etc 
+    - get_operation_type() - to get the operation to be performed from the bytecode 
+    - process_r_instr() - to process R-type instruction
+    - process_i_instr() - to process I-type instruction
+    - process_j_instr() - to process J-type instruction
+    
+      
+    returns: 
+    
+    """
     global REG_DATA, MEMORY_MAPPING, LABEL_MAPPING, STDOUT_VALUES
     MEMORY_MAPPING = memory_mapping
     LABEL_MAPPING = label_mapping
@@ -385,6 +470,7 @@ def execute_code(
 
 
 def init_info_data():
+    #initializes the Registers, memory_mapping and stdout_values
     global REG_DATA, MEMORY_MAPPING, STDOUT_VALUES
     REG_DATA = {}
     MEMORY_MAPPING = {}
@@ -395,6 +481,19 @@ def init_info_data():
 
 
 def run_vm(file, file_inputs):
+    """
+    param: file(str) - The ASM file to be assembled and has to be executed. 
+           file_inputs(List) - List of inputs to the program (command line). If no command line inputs are provided, this list would be empty.
+    
+    This function assembles the file and executes the bytecode by using the following helper functions. 
+    
+    helper_functions:
+    assemble_file() - converts asm files to bytecodes and generates label_mapping, memory_mapping
+    init_info_data() - initializes REG_DATA, Stack pointer REG_DATA["$sp"] and Frame pointer REG_DATA["$fp"]
+    execute_code() - executes the bytecode generated by assemble_files. 
+    
+    return: stdout_vals(List) - that contains the values that VM wants to return to users.
+    """
     (
         program_instructions,
         encoded_instructions,
